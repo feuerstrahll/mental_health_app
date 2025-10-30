@@ -163,8 +163,6 @@ flutter analyze
 - ✅ Web (Chrome) - работает сейчас
 - ⚠️ Windows - требует Visual Studio с C++
 - ⚠️ Android - требует Android SDK
-- ❌ iOS - требует macOS
-- ❌ Linux - в разработке
 
 ## 🆘 Помощь
 
