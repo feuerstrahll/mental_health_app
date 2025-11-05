@@ -41,6 +41,7 @@ class AppConstants {
 
 class AppRoutes {
   static const String home = '/';
+  static const String chat = '/chat';
   static const String diary = '/diary';
   static const String statistics = '/statistics';
   static const String tips = '/tips';

@@ -54,7 +54,6 @@ lib/
 **Задачи:**
 - [x] `chat/models/chat_message.dart` — модель сообщения ✅
 - [x] `core/services/storage_service.dart` — локальное хранение ✅
-- [x] `core/services/chatbot_service.dart` — логика чат-бота ✅
 - [x] `core/services/mood_repository.dart` — репозиторий дневника ✅
 - [x] `core/services/analytics_service.dart` — аналитика ✅
 - [ ] Улучшения ML/Analytics по данным пользователей
@@ -66,6 +65,7 @@ lib/
 - [x] `core/constants/app_constants.dart` — константы и роуты ✅
 - [x] `core/routing/app_router.dart` — навигация ✅
 - [x] `providers/chat_provider.dart` — состояние чата ✅
+- [x] `core/services/chatbot_service.dart` — логика чат-бота ✅
 - [x] `providers/mood_provider.dart` — состояние дневника + ML ✅
 - [x] `core/services/ml_service.dart` — интеграция TensorFlow Lite ✅
 

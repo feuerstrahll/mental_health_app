@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../features/home/screens/home_screen.dart';
+import '../../features/chat/screens/chat_screen.dart';
 import '../../features/mood/screens/diary_screen.dart';
 import '../../features/mood/screens/statistics_screen.dart';
 import '../../features/tips/screens/tips_screen.dart';
@@ -19,6 +20,14 @@ class AppRouter {
         pageBuilder: (context, state) => MaterialPage(
           key: state.pageKey,
           child: const HomeScreen(),
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.chat,
+        name: 'chat',
+        pageBuilder: (context, state) => MaterialPage(
+          key: state.pageKey,
+          child: const ChatScreen(),
         ),
       ),
       GoRoute(

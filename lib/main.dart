@@ -4,33 +4,45 @@ import 'core/constants/app_constants.dart';
 import 'providers/mood_provider.dart';
 import 'providers/chat_provider.dart';
 import 'core/services/mood_repository.dart';
+import 'core/services/chat_repository.dart';
 import 'core/services/chatbot_service.dart';
-import 'core/services/storage_service.dart';
+import 'core/services/database_service.dart';
 import 'core/routing/app_router.dart';
 
-void main() {
-  runApp(const MentalHealthApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  
+  // Инициализируем зашифрованную БД
+  final databaseService = DatabaseService.instance;
+  await databaseService.database;
+  
+  runApp(MentalHealthApp(databaseService: databaseService));
 }
 
 class MentalHealthApp extends StatelessWidget {
-  const MentalHealthApp({super.key});
+  final DatabaseService databaseService;
+  
+  const MentalHealthApp({
+    super.key,
+    required this.databaseService,
+  });
 
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        // Mood Provider - управление дневником настроения
+        // Mood Provider - управление дневником настроения (зашифрованная БД)
         ChangeNotifierProvider(
           create: (_) => MoodProvider(
-            repository: SqliteMoodRepository(),
+            repository: SqliteMoodRepository(databaseService),
           )..loadEntries(),
         ),
         
-        // Chat Provider - управление чатом с ботом
+        // Chat Provider - управление чатом с ботом (зашифрованная БД)
         ChangeNotifierProvider(
           create: (_) => ChatProvider(
             chatbotService: ChatbotService(),
-            storageService: StorageService(),
+            chatRepository: SqliteChatRepository(databaseService),
           )..initialize(),
         ),
       ],

@@ -41,6 +41,15 @@ class HomeScreen extends StatelessWidget {
             const SizedBox(height: 24),
             
             _QuickActionCard(
+              title: 'AI Chatbot',
+              description: 'Talk to your mental health companion',
+              icon: Icons.chat_bubble_outline,
+              color: Colors.deepPurple,
+              onTap: () => context.go(AppRoutes.chat),
+            ),
+            const SizedBox(height: 12),
+            
+            _QuickActionCard(
               title: 'Mood Diary',
               description: 'Track your emotions and thoughts',
               icon: Icons.edit_note,
