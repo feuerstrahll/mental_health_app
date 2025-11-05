@@ -1,6 +1,6 @@
 # Screens Directory
 
-**Assigned to: Person A**
+**Assigned to: Alena**
 
 ## Responsibilities
 

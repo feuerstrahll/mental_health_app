@@ -1,6 +1,6 @@
 # Widgets Directory
 
-**Assigned to: Person A**
+**Assigned to: Nastya**
 
 ## Responsibilities
 

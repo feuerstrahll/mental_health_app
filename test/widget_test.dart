@@ -13,8 +13,11 @@ void main() {
   testWidgets('App starts with home screen', (WidgetTester tester) async {
     // Build our app and trigger a frame.
     await tester.pumpWidget(const MentalHealthApp());
+    await tester.pumpAndSettle();
 
-    // Verify that placeholder screen is shown
-    expect(find.text('Coming soon...'), findsOneWidget);
+    // Verify that the home dashboard is shown
+    expect(find.text('Welcome back! 👋'), findsOneWidget);
+    expect(find.text('Mood Diary'), findsOneWidget);
+    expect(find.text('Statistics'), findsOneWidget);
   });
 }

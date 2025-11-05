@@ -1,6 +1,6 @@
 # Services Directory
 
-**Assigned to: Person B**
+**Assigned to: Nastya**
 
 ## Responsibilities
 

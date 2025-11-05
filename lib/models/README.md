@@ -1,6 +1,6 @@
 # Models Directory
 
-**Assigned to: Person B**
+**Assigned to: Vera**
 
 ## Responsibilities
 

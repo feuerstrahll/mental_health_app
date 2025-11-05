@@ -11,32 +11,28 @@ class MentalHealthApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return MaterialApp.router(
       title: AppConstants.appName,
       debugShowCheckedModeBanner: false,
+      routerConfig: AppRouter.router,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
-          seedColor: AppColors.primary,
+          seedColor: Colors.deepPurple,
         ),
         useMaterial3: true,
         appBarTheme: const AppBarTheme(
-          backgroundColor: AppColors.primary,
+          backgroundColor: Colors.deepPurple,
           foregroundColor: Colors.white,
           elevation: 0,
         ),
         floatingActionButtonTheme: const FloatingActionButtonThemeData(
-          backgroundColor: AppColors.primary,
+          backgroundColor: Colors.deepPurple,
           foregroundColor: Colors.white,
         ),
-        cardTheme: CardThemeData(
-          elevation: AppConstants.cardElevation,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(AppConstants.borderRadius),
-          ),
+        cardTheme: const CardThemeData(
+          elevation: 4,
         ),
       ),
-      onGenerateRoute: AppRouter.generateRoute,
-      initialRoute: '/',
     );
   }
 }
