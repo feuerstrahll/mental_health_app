@@ -1,4 +1,3 @@
-// lib/screens/diary_screen.dart
 import 'package:flutter/material.dart';
 
 /// Diary Screen - Emotion and mood tracking
@@ -56,4 +55,3 @@ class DiaryScreen extends StatelessWidget {
     );
   }
 }
-

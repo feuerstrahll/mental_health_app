@@ -1,4 +1,3 @@
-// lib/screens/statistics_screen.dart
 import 'package:flutter/material.dart';
 
 /// Statistics Screen - Displays graphs and observations
@@ -212,4 +211,3 @@ class _StatisticCard extends StatelessWidget {
     );
   }
 }
-

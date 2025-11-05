@@ -56,10 +56,18 @@ class YourProvider extends ChangeNotifier {
 ```dart
 MultiProvider(
   providers: [
-    ChangeNotifierProvider(create: (_) => ChatProvider(ChatbotService(), StorageService())),
-    ChangeNotifierProvider(create: (_) => MoodProvider(StorageService())),
+    ChangeNotifierProvider(
+      create: (_) => ChatProvider(
+        chatbotService: ChatbotService(),
+        storageService: StorageService(),
+      )..initialize(),
+    ),
+    ChangeNotifierProvider(
+      create: (_) => MoodProvider(
+        repository: SqliteMoodRepository(),
+      )..loadEntries(),
+    ),
   ],
   child: MyApp(),
 )
 ```
-

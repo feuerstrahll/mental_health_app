@@ -1,13 +1,13 @@
-// lib/routes/app_router.dart
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../screens/home_screen.dart';
-import '../screens/diary_screen.dart';
-import '../screens/statistics_screen.dart';
-import '../screens/tips_screen.dart';
-import '../screens/help_screen.dart';
-import '../screens/settings_screen.dart';
-import '../utils/constants.dart';
+
+import '../../features/home/screens/home_screen.dart';
+import '../../features/mood/screens/diary_screen.dart';
+import '../../features/mood/screens/statistics_screen.dart';
+import '../../features/tips/screens/tips_screen.dart';
+import '../../features/help/screens/help_screen.dart';
+import '../../features/settings/screens/settings_screen.dart';
+import '../constants/app_constants.dart';
 
 class AppRouter {
   static final GoRouter router = GoRouter(

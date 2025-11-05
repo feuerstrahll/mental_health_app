@@ -1,7 +1,7 @@
-// lib/screens/home_screen.dart
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../utils/constants.dart';
+
+import '../../../core/constants/app_constants.dart';
 
 /// Home Screen - Main dashboard
 /// 
@@ -146,4 +146,3 @@ class _QuickActionCard extends StatelessWidget {
     );
   }
 }
-

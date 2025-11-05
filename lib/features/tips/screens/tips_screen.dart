@@ -1,23 +1,21 @@
-// lib/screens/help_screen.dart
 import 'package:flutter/material.dart';
 
-/// Help Screen - Support resources and emergency contacts
+/// Tips Screen - Self-care tips and practices
 /// 
-/// Алена: Implement help section with:
-/// - Emergency hotlines
-/// - Mental health resources
-/// - Crisis support information
-/// - Professional help finder
+/// Алена: Implement tips section with:
+/// - Categories of tips (Breathing, Exercise, Mindfulness, etc.)
+/// - Tip cards with descriptions
+/// - Favorite tips functionality
+/// - Daily tip recommendation
 
-class HelpScreen extends StatelessWidget {
-  const HelpScreen({super.key});
+class TipsScreen extends StatelessWidget {
+  const TipsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Get Help'),
-        backgroundColor: Colors.orange,
+        title: const Text('Self-Care Tips'),
       ),
       body: const Center(
         child: Padding(
@@ -25,10 +23,10 @@ class HelpScreen extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.support_agent, size: 80, color: Colors.grey),
+              Icon(Icons.spa, size: 80, color: Colors.grey),
               SizedBox(height: 16),
               Text(
-                'Support Resources',
+                'Self-Care Tips',
                 style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
               SizedBox(height: 8),
@@ -38,7 +36,7 @@ class HelpScreen extends StatelessWidget {
               ),
               SizedBox(height: 16),
               Text(
-                'Алена will implement support resources and emergency contacts here',
+                'Алена will implement self-care tips and practices here',
                 textAlign: TextAlign.center,
                 style: TextStyle(fontSize: 14, color: Colors.grey),
               ),
@@ -49,4 +47,3 @@ class HelpScreen extends StatelessWidget {
     );
   }
 }
-

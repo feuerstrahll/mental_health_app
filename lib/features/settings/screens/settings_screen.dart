@@ -1,8 +1,7 @@
-// lib/screens/settings_screen.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../providers/mood_provider.dart';
+import '../../../providers/mood_provider.dart';
 
 /// Settings Screen - App settings and preferences
 /// 
@@ -65,4 +64,3 @@ class SettingsScreen extends StatelessWidget {
     );
   }
 }
-

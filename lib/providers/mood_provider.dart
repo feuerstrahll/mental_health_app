@@ -14,7 +14,8 @@ import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 
-import '../utils/constants.dart';
+import '../core/constants/app_constants.dart';
+import '../core/services/ml_service.dart';
 
 /// Represents a single mood diary entry.
 ///
@@ -91,6 +92,7 @@ class MoodProvider extends ChangeNotifier {
 
   final MoodRepository _repository;
   final List<MoodEntry> _entries = <MoodEntry>[];
+  MLService? _mlService;
 
   bool _isLoading = false;
   bool _hasError = false;
@@ -298,17 +300,53 @@ class MoodProvider extends ChangeNotifier {
     }
   }
 
-  /// Placeholder for future TensorFlow Lite integration.
-  ///
-  /// Nastya can experiment with training a small on-device model that
-  /// predicts the next-day mood or stress level based on historical data.
-  Future<void> prepareTensorflowLitePipeline() async {
-    // TODO(Nastya): Investigate TensorFlow Lite model training and inference.
-    // Suggested steps:
-    // 1. Export diary data as CSV/JSON.
-    // 2. Train a lightweight classification/regression model offline.
-    // 3. Convert the model to TFLite and bundle it with the app.
-    // 4. Load and execute the model inside this provider when new data arrives.
+  /// Предсказание следующего настроения с использованием ML
+  Future<Map<String, double>> predictNextMood() async {
+    if (_entries.length < 3) {
+      return {};
+    }
+    
+    // Lazy load ML service
+    try {
+      final mlService = await _getMLService();
+      return await mlService.predictNextMood(_entries);
+    } catch (e) {
+      if (kDebugMode) {
+        debugPrint('ML prediction failed: $e');
+      }
+      return {};
+    }
+  }
+
+  /// Получение рекомендованной категории советов
+  String getRecommendedTipCategory() {
+    if (_entries.isEmpty) return 'general';
+    
+    try {
+      // Используем синхронный анализ для быстрого ответа
+      final recent = _entries.take(7).toList();
+      final avgStress = recent.fold<int>(0, (sum, e) => sum + e.stressLevel) / recent.length;
+      
+      if (avgStress > 7) return 'stress_management';
+      if (avgStress > 5) return 'relaxation';
+      if (avgStress < 3) return 'positive_habits';
+      return 'general';
+    } catch (e) {
+      return 'general';
+    }
+  }
+
+  // Lazy ML service loader
+  Future<MLService> _getMLService() async {
+    _mlService ??= MLService();
+    await _mlService!.initialize();
+    return _mlService!;
+  }
+
+  @override
+  void dispose() {
+    _mlService?.dispose();
+    super.dispose();
   }
 
   void _setLoading(bool value) {
