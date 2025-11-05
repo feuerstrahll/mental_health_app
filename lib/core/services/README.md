@@ -10,8 +10,9 @@
 2. `analytics_service.dart` — аналитика и рекомендации (ML + эвристики)
 3. `chatbot_service.dart` — правила ответов чат-бота
 4. `ml_service.dart` — обертка над TensorFlow Lite моделью
-5. `mood_repository.dart` — загрузка/сохранение записей настроения
-6. `storage_service.dart` — файловое хранилище настроек и чатов
+5. `mood_repository.dart` — загрузка/сохранение записей настроения (зашифрованная БД)
+6. `chat_repository.dart` — загрузка/сохранение сообщений чата (зашифрованная БД)
+7. `storage_service.dart` — файловое хранилище для настроек приложения
 
 ## Guidelines
 

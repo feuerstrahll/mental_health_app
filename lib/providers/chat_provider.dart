@@ -2,25 +2,27 @@
 //
 // Управление состоянием чата с ботом-помощником.
 // Интегрируется с ChatbotService для генерации ответов и
-// StorageService для сохранения истории сообщений.
+// ChatRepository для сохранения истории сообщений в зашифрованной БД.
 
 import 'dart:collection';
+import 'dart:io';
 import 'dart:math';
 import 'package:flutter/foundation.dart';
+import 'package:path_provider/path_provider.dart';
 import '../features/chat/models/chat_message.dart';
 import '../core/services/chatbot_service.dart';
-import '../core/services/storage_service.dart';
+import '../core/services/chat_repository.dart';
 
 /// Provider для управления состоянием чата
 class ChatProvider extends ChangeNotifier {
   ChatProvider({
     required ChatbotService chatbotService,
-    required StorageService storageService,
+    required ChatRepository chatRepository,
   })  : _chatbotService = chatbotService,
-        _storageService = storageService;
+        _chatRepository = chatRepository;
 
   final ChatbotService _chatbotService;
-  final StorageService _storageService;
+  final ChatRepository _chatRepository;
   final List<ChatMessage> _messages = <ChatMessage>[];
 
   bool _isLoading = false;
@@ -45,8 +47,8 @@ class ChatProvider extends ChangeNotifier {
     _clearError();
 
     try {
-      // Загружаем историю сообщений
-      final savedMessages = await _storageService.loadChatMessages();
+      // Загружаем историю сообщений из БД
+      final savedMessages = await _chatRepository.fetchMessages();
       _messages
         ..clear()
         ..addAll(savedMessages);
@@ -147,7 +149,7 @@ class ChatProvider extends ChangeNotifier {
   /// Очищает всю историю чата
   Future<void> clearHistory() async {
     try {
-      await _storageService.clearChatHistory();
+      await _chatRepository.clearAll();
       _messages.clear();
       
       // Добавляем приветственное сообщение
@@ -167,10 +169,33 @@ class ChatProvider extends ChangeNotifier {
     }
   }
 
-  /// Экспортирует историю чата в файл
+  /// Экспортирует историю чата в текстовый файл
   Future<String> exportHistory() async {
     try {
-      return await _storageService.exportChatHistory(_messages);
+      if (_messages.isEmpty) {
+        return 'No messages to export';
+      }
+
+      // Используем path_provider для получения директории
+      final directory = await getApplicationDocumentsDirectory();
+      final timestamp = DateTime.now().toIso8601String().replaceAll(':', '-');
+      final file = File('${directory.path}/chat_export_$timestamp.txt');
+      
+      final buffer = StringBuffer();
+      buffer.writeln('Chat History Export');
+      buffer.writeln('Generated: ${DateTime.now()}');
+      buffer.writeln('=' * 50);
+      buffer.writeln();
+
+      for (final message in _messages) {
+        final sender = message.isFromUser ? 'You' : 'Bot';
+        buffer.writeln('[$sender] ${message.timestamp}');
+        buffer.writeln(message.text);
+        buffer.writeln();
+      }
+
+      await file.writeAsString(buffer.toString(), flush: true);
+      return 'Chat history exported to:\n${file.path}';
     } catch (error, stackTrace) {
       _handleError('Failed to export chat history', error, stackTrace);
       return 'Export failed: $error';
@@ -183,7 +208,7 @@ class ChatProvider extends ChangeNotifier {
     _clearError();
 
     try {
-      final savedMessages = await _storageService.loadChatMessages();
+      final savedMessages = await _chatRepository.fetchMessages();
       _messages
         ..clear()
         ..addAll(savedMessages);
@@ -260,7 +285,7 @@ class ChatProvider extends ChangeNotifier {
 
   Future<void> _saveMessages() async {
     try {
-      await _storageService.saveChatMessages(_messages);
+      await _chatRepository.saveMessages(_messages);
     } catch (error, stackTrace) {
       if (kDebugMode) {
         debugPrint('Error saving messages: $error');

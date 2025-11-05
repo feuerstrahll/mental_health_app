@@ -6,11 +6,13 @@ import 'database_service.dart';
 
 /// Реализация MoodRepository на основе зашифрованной SQLite (sqflite_sqlcipher)
 class SqliteMoodRepository implements MoodRepository {
-  SqliteMoodRepository();
+  final DatabaseService _databaseService;
+  
+  SqliteMoodRepository(this._databaseService);
 
   static const String _tableName = 'mood_entries';
 
-  Future<Database> _db() => DatabaseService.instance.database;
+  Future<Database> _db() => _databaseService.database;
 
   @override
   Future<List<MoodEntry>> fetchEntries() async {

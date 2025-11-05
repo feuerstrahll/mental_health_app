@@ -11,7 +11,7 @@ class DatabaseService {
   static final DatabaseService instance = DatabaseService._();
 
   static const String _dbName = 'mental_health.db';
-  static const int _dbVersion = 1;
+  static const int _dbVersion = 2;
   static const String _encryptionKeyStorageKey = 'db_encryption_key';
 
   Database? _database;
@@ -47,6 +47,7 @@ class DatabaseService {
   }
 
   Future<void> _onCreate(Database db, int version) async {
+    // Mood entries table
     await db.execute('''
       CREATE TABLE mood_entries (
         id TEXT PRIMARY KEY,
@@ -56,10 +57,26 @@ class DatabaseService {
         note TEXT
       )
     ''');
+
+    // Chat messages table
+    await db.execute('''
+      CREATE TABLE chat_messages (
+        id TEXT PRIMARY KEY,
+        data TEXT NOT NULL
+      )
+    ''');
   }
 
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
-    // Future migrations will be handled here. Keep structure for scalability.
+    // Migration from v1 to v2: Add chat_messages table
+    if (oldVersion < 2) {
+      await db.execute('''
+        CREATE TABLE chat_messages (
+          id TEXT PRIMARY KEY,
+          data TEXT NOT NULL
+        )
+      ''');
+    }
   }
 
   Future<String> _getOrCreateEncryptionKey() async {
