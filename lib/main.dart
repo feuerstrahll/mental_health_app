@@ -1,6 +1,12 @@
 import 'package:flutter/material.dart';
-import 'routes/app_router.dart';
-import 'utils/constants.dart';
+import 'package:provider/provider.dart';
+import 'core/constants/app_constants.dart';
+import 'providers/mood_provider.dart';
+import 'providers/chat_provider.dart';
+import 'core/services/mood_repository.dart';
+import 'core/services/chatbot_service.dart';
+import 'core/services/storage_service.dart';
+import 'core/routing/app_router.dart';
 
 void main() {
   runApp(const MentalHealthApp());
@@ -11,32 +17,46 @@ class MentalHealthApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: AppConstants.appName,
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: AppColors.primary,
+    return MultiProvider(
+      providers: [
+        // Mood Provider - управление дневником настроения
+        ChangeNotifierProvider(
+          create: (_) => MoodProvider(
+            repository: SqliteMoodRepository(),
+          )..loadEntries(),
         ),
-        useMaterial3: true,
-        appBarTheme: const AppBarTheme(
-          backgroundColor: AppColors.primary,
-          foregroundColor: Colors.white,
-          elevation: 0,
+        
+        // Chat Provider - управление чатом с ботом
+        ChangeNotifierProvider(
+          create: (_) => ChatProvider(
+            chatbotService: ChatbotService(),
+            storageService: StorageService(),
+          )..initialize(),
         ),
-        floatingActionButtonTheme: const FloatingActionButtonThemeData(
-          backgroundColor: AppColors.primary,
-          foregroundColor: Colors.white,
-        ),
-        cardTheme: CardThemeData(
-          elevation: AppConstants.cardElevation,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(AppConstants.borderRadius),
+      ],
+      child: MaterialApp.router(
+        title: AppConstants.appName,
+        debugShowCheckedModeBanner: false,
+        routerConfig: AppRouter.router,
+        theme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(
+            seedColor: Colors.deepPurple,
+          ),
+          useMaterial3: true,
+          appBarTheme: const AppBarTheme(
+            backgroundColor: Colors.deepPurple,
+            foregroundColor: Colors.white,
+            elevation: 0,
+          ),
+          floatingActionButtonTheme: const FloatingActionButtonThemeData(
+            backgroundColor: Colors.deepPurple,
+            foregroundColor: Colors.white,
+          ),
+          cardTheme: const CardThemeData(
+            elevation: 4,
           ),
         ),
       ),
-      onGenerateRoute: AppRouter.generateRoute,
-      initialRoute: '/',
     );
   }
 }

@@ -1,22 +1,18 @@
 # Models Directory
 
-**Assigned to: Person B**
+**Assigned to: Vera**
 
-## Responsibilities
+This directory хранит **общие** модели, переиспользуемые в нескольких модулях.
 
-This directory contains all data models for the Mental Health Companion app.
+Модели, относящиеся к одному фиче-модулю, теперь лежат рядом с ним, напр.:
 
-### What to create:
+- `lib/features/chat/models/chat_message.dart`
+- `lib/features/mood/...` (планируется `mood_entry.dart`)
 
-1. **chat_message.dart** - Model for chat messages
-   - id, text, isUser, timestamp fields
-   - JSON serialization methods
+### Что добавить сюда в будущем
 
-2. **mood_entry.dart** - Model for mood diary entries
-   - id, mood type (enum), note, timestamp fields
-   - Helper methods for mood representation (emoji, names, values)
-
-3. **user_profile.dart** (optional) - User settings and preferences
+1. **mood_entry.dart** — общий объект записи настроения (когда понадобятся общие операции)
+2. **user_profile.dart** (опционально) — пользовательские настройки/предпочтения
 
 ## Guidelines
 
