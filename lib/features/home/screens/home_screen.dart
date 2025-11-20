@@ -1,157 +1,431 @@
+// R - перезагрузка проги, (без перезапуска) чтобы посмотреть как работает измененное
+// q - завершить работу проги
+// плсмотреть эмуляторы
+// flutter emulators 
+// запуск:
+// (flutter clean)
+// flutter pub get
+// flutter run -v -d emulator-5554   (запуск с логами)
+
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 
-import '../../../core/constants/app_constants.dart';
+import 'package:mental_health_app/features/chat/screens/chat_screen.dart';
+import 'package:mental_health_app/features/mood/screens/statistics_screen.dart';
+import 'package:mental_health_app/features/help/screens/help_screen.dart';
+import 'package:mental_health_app/features/tips/screens/tips_screen.dart';
+import 'package:mental_health_app/features/settings/screens/settings_screen.dart';
 
-/// Home Screen - Main dashboard
-/// 
-/// Алена: Implement the main dashboard with:
-/// - Welcome message
-/// - Quick action cards (Log Mood, View Stats, Get Tips)
-/// - Recent mood summary
-/// - Navigation to other screens
-
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Home'),
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  bool _interactionActive = false; // показывать ли смайлы + карточку снизу
+  int? _selectedEmotionIndex;
+  String? _selectedTag;
+  final TextEditingController _noteController = TextEditingController();
+
+  final List<String> _emotionLabels = [
+    'Очень плохо',
+    'Так себе',
+    'Нормально',
+    'Хорошо',
+    'Отлично',
+  ];
+
+  final List<String> _tags = [
+    'Без тега',
+    'Учёба / работа',
+    'Отдых',
+    'Друзья / семья',
+    'Здоровье',
+  ];
+
+  @override
+  void dispose() {
+    _noteController.dispose();
+    super.dispose();
+  }
+
+  void _onSheepTap() {
+    setState(() {
+      _interactionActive = true; // включаем режим выбора эмоции
+    });
+  }
+
+  void _onEmotionTap(int index) {
+    setState(() {
+      _selectedEmotionIndex = index;
+    });
+  }
+
+  void _resetUI() {
+    setState(() {
+      _interactionActive = false;
+      _selectedEmotionIndex = null;
+      _selectedTag = null;
+      _noteController.clear();
+    });
+  }
+
+  void _onSave() {
+    // TODO: сохранить данные в БД (эмоция, тег, заметка, дата)
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Запись будет сохранена в БД позже 🙂')),
+    );
+    _resetUI(); // после сохранения возвращаем экран в исходное состояние
+  }
+
+  void _openMenu() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Welcome back! 👋',
-              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
+      builder: (context) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(height: 12),
+              const Text(
+                'Навигация',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+              ),
+              const SizedBox(height: 8),
+              ListTile(
+                leading: const Icon(Icons.smart_toy_outlined),
+                title: const Text('ИИ-бот'),
+                subtitle: const Text('Поговорить и получить поддержку'),
+                onTap: () {
+                  Navigator.pop(context);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const ChatScreen()),
+                  );
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.bar_chart),
+                title: const Text('Статистика'),
+                subtitle: const Text('Посмотреть динамику настроения'),
+                onTap: () {
+                  Navigator.pop(context);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (_) => const StatisticsScreen()),
+                  );
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.help_outline),
+                title: const Text('Помощь'),
+                subtitle: const Text('Полезная информация и ресурсы'),
+                onTap: () {
+                  Navigator.pop(context);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const HelpScreen()),
+                  );
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.lightbulb_outline),
+                title: const Text('Советы'),
+                subtitle: const Text('Небольшие рекомендации на каждый день'),
+                onTap: () {
+                  Navigator.pop(context);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const TipsScreen()),
+                  );
+                },
+              ),
+              ListTile(
+              leading: const Icon(Icons.settings_outlined),
+              title: const Text('Настройки'),
+              subtitle: const Text('Тема, уведомления и другие опции'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const SettingsScreen(),
                   ),
+                );
+              },
             ),
-            const SizedBox(height: 8),
-            Text(
-              'How are you feeling today?',
-              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: Colors.grey[600],
-                  ),
-            ),
-            const SizedBox(height: 24),
-            
-            _QuickActionCard(
-              title: 'AI Chatbot',
-              description: 'Talk to your mental health companion',
-              icon: Icons.chat_bubble_outline,
-              color: Colors.deepPurple,
-              onTap: () => context.go(AppRoutes.chat),
-            ),
-            const SizedBox(height: 12),
-            
-            _QuickActionCard(
-              title: 'Mood Diary',
-              description: 'Track your emotions and thoughts',
-              icon: Icons.edit_note,
-              color: Colors.blue,
-              onTap: () => context.go(AppRoutes.diary),
-            ),
-            const SizedBox(height: 12),
-            
-            _QuickActionCard(
-              title: 'Statistics',
-              description: 'View your progress and insights',
-              icon: Icons.bar_chart,
-              color: Colors.green,
-              onTap: () => context.go(AppRoutes.statistics),
-            ),
-            const SizedBox(height: 12),
-            
-            _QuickActionCard(
-              title: 'Self-Care Tips',
-              description: 'Get helpful advice and practices',
-              icon: Icons.spa,
-              color: Colors.purple,
-              onTap: () => context.go(AppRoutes.tips),
-            ),
-            const SizedBox(height: 12),
-            
-            _QuickActionCard(
-              title: 'Get Help',
-              description: 'Access support resources',
-              icon: Icons.support_agent,
-              color: Colors.orange,
-              onTap: () => context.go(AppRoutes.help),
-            ),
-          ],
+              const SizedBox(height: 12),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildBottomCard(DateTime now) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.96),
+        borderRadius: const BorderRadius.vertical(
+          top: Radius.circular(24),
         ),
+        boxShadow: const [
+          BoxShadow(
+            color: Colors.black26,
+            blurRadius: 8,
+            offset: Offset(0, -2),
+          ),
+        ],
+      ),
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.calendar_today, size: 18),
+              const SizedBox(width: 8),
+              Text(
+                'Сегодня: '
+                '${now.day.toString().padLeft(2, '0')}.'
+                '${now.month.toString().padLeft(2, '0')}.'
+                '${now.year}',
+                style: const TextStyle(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          DropdownButtonFormField<String>(
+            value: _selectedTag,
+            decoration: const InputDecoration(
+              labelText: 'Тег для записи (для календаря)',
+              border: OutlineInputBorder(),
+            ),
+            items: _tags
+                .map(
+                  (tag) => DropdownMenuItem(
+                    value: tag == 'Без тега' ? null : tag,
+                    child: Text(tag),
+                  ),
+                )
+                .toList(),
+            onChanged: (value) {
+              setState(() {
+                _selectedTag = value;
+              });
+            },
+          ),
+          const SizedBox(height: 12),
+          TextField(
+            controller: _noteController,
+            minLines: 1,
+            maxLines: 3,
+            decoration: const InputDecoration(
+              labelText: 'Короткая подпись к сегодняшней записи',
+              hintText: 'Например: «гуляла с друзьями, стало легче»',
+              border: OutlineInputBorder(),
+            ),
+          ),
+          const SizedBox(height: 12),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              onPressed:
+                  _selectedEmotionIndex == null ? null : _onSave, // без эмоции не сохраняем
+              icon: const Icon(Icons.check),
+              label: const Text('Сохранить настроение'),
+            ),
+          ),
+        ],
       ),
     );
   }
-}
-
-class _QuickActionCard extends StatelessWidget {
-  final String title;
-  final String description;
-  final IconData icon;
-  final Color color;
-  final VoidCallback onTap;
-
-  const _QuickActionCard({
-    required this.title,
-    required this.description,
-    required this.icon,
-    required this.color,
-    required this.onTap,
-  });
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      elevation: 2,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: color.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(icon, color: color, size: 28),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      description,
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey[600],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Icon(Icons.arrow_forward_ios, color: Colors.grey[400], size: 16),
-            ],
-          ),
-        ),
+    final now = DateTime.now();
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Твой день'),
+        backgroundColor: Colors.green.shade700,
+        foregroundColor: Colors.white,
+        elevation: 0,
       ),
+      body: Stack(
+        children: [
+          // Фон с овечкой
+          Positioned.fill(
+            child: Image.asset(
+              'assets/images/sheep_diary_bg.jpg',
+              fit: BoxFit.cover,
+            ),
+          ),
+
+          SafeArea(
+            child: Column(
+              children: [
+                // Верхняя часть: овечка + смайлы
+                Expanded(
+                  child: Stack(
+                    children: [
+                      // Тап по свободному месту скрывает эмоции/карточку
+                      GestureDetector(
+                        behavior: HitTestBehavior.opaque,
+                        onTap: () {
+                          if (_interactionActive) {
+                            _resetUI();
+                          }
+                        },
+                        child: Container(),
+                      ),
+
+                      // Круг в районе овечки
+                      Align(
+                        alignment: const Alignment(0, 0.55),
+                        child: GestureDetector(
+                          onTap: _onSheepTap,
+                          child: SizedBox(
+                            width: 160,
+                            height: 160,
+                            child: Container(
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: Colors.black.withOpacity(0.12),
+                              ),
+                              alignment: Alignment.center,
+                              child: const Text(
+                                'нажми на овечку',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 14,
+                                  shadows: [
+                                    Shadow(
+                                      color: Colors.black54,
+                                      blurRadius: 4,
+                                    ),
+                                  ],
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+
+                      // Смайлики под овечкой
+                      Align(
+                        alignment: const Alignment(0, 0.9),
+                        child: AnimatedSwitcher(
+                          duration: const Duration(milliseconds: 220),
+                          child: _interactionActive
+                              ? Column(
+                                  key: const ValueKey('home_emotions'),
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 16,
+                                        vertical: 8,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: Colors.black.withOpacity(0.35),
+                                        borderRadius:
+                                            BorderRadius.circular(32),
+                                      ),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: List.generate(5, (index) {
+                                          final isSelected =
+                                              _selectedEmotionIndex == index;
+                                          return GestureDetector(
+                                            onTap: () => _onEmotionTap(index),
+                                            child: AnimatedContainer(
+                                              duration: const Duration(
+                                                  milliseconds: 150),
+                                              margin:
+                                                  const EdgeInsets.symmetric(
+                                                      horizontal: 4),
+                                              padding:
+                                                  const EdgeInsets.all(10),
+                                              decoration: BoxDecoration(
+                                                shape: BoxShape.circle,
+                                                color: isSelected
+                                                    ? Colors.white
+                                                        .withOpacity(0.9)
+                                                    : Colors.white
+                                                        .withOpacity(0.3),
+                                                border: isSelected
+                                                    ? Border.all(
+                                                        color: Colors.white,
+                                                        width: 2,
+                                                      )
+                                                    : null,
+                                              ),
+                                              child: Text(
+                                                ['😢', '🙁', '😐', '🙂', '🤩']
+                                                    [index],
+                                                style: const TextStyle(
+                                                  fontSize: 24,
+                                                ),
+                                              ),
+                                            ),
+                                          );
+                                        }),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 8),
+                                    if (_selectedEmotionIndex != null)
+                                      Text(
+                                        _emotionLabels[_selectedEmotionIndex!],
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w500,
+                                          shadows: [
+                                            Shadow(
+                                              color: Colors.black54,
+                                              blurRadius: 4,
+                                            )
+                                          ],
+                                        ),
+                                      ),
+                                  ],
+                                )
+                              : const SizedBox.shrink(),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                // Нижняя карточка появляется только в режиме взаимодействия
+                AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 220),
+                  child: _interactionActive
+                      ? _buildBottomCard(now)
+                      : const SizedBox.shrink(),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+
+      // Кружок-меню снизу
+      floatingActionButton: FloatingActionButton(
+        onPressed: _openMenu,
+        child: const Icon(Icons.menu),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
 }
