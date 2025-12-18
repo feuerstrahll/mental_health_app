@@ -11,7 +11,7 @@ class DatabaseService {
   static final DatabaseService instance = DatabaseService._();
 
   static const String _dbName = 'mental_health.db';
-  static const int _dbVersion = 2;
+  static const int _dbVersion = 3;
   static const String _encryptionKeyStorageKey = 'db_encryption_key';
 
   Database? _database;
@@ -75,6 +75,30 @@ class DatabaseService {
           id TEXT PRIMARY KEY,
           data TEXT NOT NULL
         )
+      ''');
+    }
+    // Migration to v3: Add intervention_feedback table
+    if (oldVersion < 3) {
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS intervention_feedback (
+          id TEXT PRIMARY KEY,
+          intervention_id TEXT NOT NULL,
+          timestamp TEXT NOT NULL,
+          was_helpful INTEGER NOT NULL,
+          mood_before INTEGER,
+          mood_after INTEGER,
+          note TEXT,
+          emotion TEXT NOT NULL,
+          stress_level INTEGER NOT NULL
+        )
+      ''');
+      await db.execute('''
+        CREATE INDEX IF NOT EXISTS idx_intervention_id 
+        ON intervention_feedback(intervention_id)
+      ''');
+      await db.execute('''
+        CREATE INDEX IF NOT EXISTS idx_timestamp 
+        ON intervention_feedback(timestamp)
       ''');
     }
   }

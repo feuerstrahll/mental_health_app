@@ -14,6 +14,8 @@ import 'package:mental_health_app/features/mood/screens/statistics_screen.dart';
 import 'package:mental_health_app/features/help/screens/help_screen.dart';
 import 'package:mental_health_app/features/tips/screens/tips_screen.dart';
 import 'package:mental_health_app/features/settings/screens/settings_screen.dart';
+import 'package:mental_health_app/widgets/mood_selector.dart';
+import 'package:mental_health_app/core/constants/app_constants.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -24,7 +26,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   bool _interactionActive = false; // показывать ли смайлы + карточку снизу
-  int? _selectedEmotionIndex;
+  String? _selectedEmotion; // Изменено с int? на String?
   String? _selectedTag;
   final TextEditingController _noteController = TextEditingController();
 
@@ -35,6 +37,9 @@ class _HomeScreenState extends State<HomeScreen> {
     'Хорошо',
     'Отлично',
   ];
+  
+  // Маппинг эмодзи к эмоциям из AppConstants
+  final List<String> _emojiToEmotion = ['Sad', 'Sad', 'Neutral', 'Happy', 'Happy'];
 
   final List<String> _tags = [
     'Без тега',
@@ -56,16 +61,16 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
-  void _onEmotionTap(int index) {
+  void _onEmotionSelected(String emotion) {
     setState(() {
-      _selectedEmotionIndex = index;
+      _selectedEmotion = emotion;
     });
   }
 
   void _resetUI() {
     setState(() {
       _interactionActive = false;
-      _selectedEmotionIndex = null;
+      _selectedEmotion = null;
       _selectedTag = null;
       _noteController.clear();
     });
@@ -239,7 +244,7 @@ class _HomeScreenState extends State<HomeScreen> {
             width: double.infinity,
             child: ElevatedButton.icon(
               onPressed:
-                  _selectedEmotionIndex == null ? null : _onSave, // без эмоции не сохраняем
+                  _selectedEmotion == null ? null : _onSave, // без эмоции не сохраняем
               icon: const Icon(Icons.check),
               label: const Text('Сохранить настроение'),
             ),
@@ -327,78 +332,12 @@ class _HomeScreenState extends State<HomeScreen> {
                         child: AnimatedSwitcher(
                           duration: const Duration(milliseconds: 220),
                           child: _interactionActive
-                              ? Column(
+                              ? MoodSelector(
                                   key: const ValueKey('home_emotions'),
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 16,
-                                        vertical: 8,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color: Colors.black.withOpacity(0.35),
-                                        borderRadius:
-                                            BorderRadius.circular(32),
-                                      ),
-                                      child: Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: List.generate(5, (index) {
-                                          final isSelected =
-                                              _selectedEmotionIndex == index;
-                                          return GestureDetector(
-                                            onTap: () => _onEmotionTap(index),
-                                            child: AnimatedContainer(
-                                              duration: const Duration(
-                                                  milliseconds: 150),
-                                              margin:
-                                                  const EdgeInsets.symmetric(
-                                                      horizontal: 4),
-                                              padding:
-                                                  const EdgeInsets.all(10),
-                                              decoration: BoxDecoration(
-                                                shape: BoxShape.circle,
-                                                color: isSelected
-                                                    ? Colors.white
-                                                        .withOpacity(0.9)
-                                                    : Colors.white
-                                                        .withOpacity(0.3),
-                                                border: isSelected
-                                                    ? Border.all(
-                                                        color: Colors.white,
-                                                        width: 2,
-                                                      )
-                                                    : null,
-                                              ),
-                                              child: Text(
-                                                ['😢', '🙁', '😐', '🙂', '🤩']
-                                                    [index],
-                                                style: const TextStyle(
-                                                  fontSize: 24,
-                                                ),
-                                              ),
-                                            ),
-                                          );
-                                        }),
-                                      ),
-                                    ),
-                                    const SizedBox(height: 8),
-                                    if (_selectedEmotionIndex != null)
-                                      Text(
-                                        _emotionLabels[_selectedEmotionIndex!],
-                                        style: const TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.w500,
-                                          shadows: [
-                                            Shadow(
-                                              color: Colors.black54,
-                                              blurRadius: 4,
-                                            )
-                                          ],
-                                        ),
-                                      ),
-                                  ],
+                                  selectedEmotion: _selectedEmotion,
+                                  onEmotionSelected: _onEmotionSelected,
+                                  style: EmotionSelectorStyle.emoji,
+                                  emotionLabels: _emotionLabels,
                                 )
                               : const SizedBox.shrink(),
                         ),
