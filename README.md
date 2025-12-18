@@ -16,7 +16,10 @@ lib/
 │       ├── chatbot_service.dart       # ✅ Логика чат-бота
 │       ├── ml_service.dart            # ✅ TFLite inference
 │       ├── mood_repository.dart       # ✅ Репозиторий дневника
-│       └── storage_service.dart       # ✅ Локальное хранение
+│       ├── storage_service.dart       # ✅ Локальное хранение
+│       ├── chat_repository.dart       # ✅ Репозиторий чата
+│       ├── feedback_service.dart      # ✅ Сервис обратной связи
+│       └── recommendation_service.dart # ✅ Сервис рекомендаций
 ├── features/
 │   ├── chat/
 │   │   ├── models/chat_message.dart   # ✅ Модель сообщения
@@ -30,8 +33,13 @@ lib/
 │   └── settings/screens/settings_screen.dart # ✅ Настройки
 ├── providers/
 │   ├── chat_provider.dart            # ✅ Провайдер чата
-│   └── mood_provider.dart            # ✅ Провайдер дневника и ML
+│   ├── mood_provider.dart            # ✅ Провайдер дневника и ML
+│   └── recommendation_provider.dart   # ✅ Провайдер рекомендаций
 ├── widgets/                           # Переиспользуемые компоненты
+│   ├── message_bubble.dart          # ✅ Виджет сообщения чата
+│   ├── mood_selector.dart           # ✅ Селектор эмоций
+│   ├── feature_card.dart             # ✅ Карточка функции
+│   ├── mood_chart.dart               # ✅ Графики настроения
 │   └── README.md
 └── features/README.md               # Документация по модулям
 ```
@@ -43,10 +51,10 @@ lib/
 
 **Задачи:**
 - [x] `home/screens/home_screen.dart` — главный экран ✅
-- [x] `chat/screens/chat_screen.dart` — интерфейс чата ✅ (пример)
-- [ ] `mood/screens/diary_screen.dart` — дневник (плейсхолдер)
-- [ ] `mood/screens/statistics_screen.dart` — статистика (плейсхолдер)
-- [ ] Общие виджеты: `message_bubble`, `mood_selector`, `feature_card`, `mood_chart`
+- [x] `chat/screens/chat_screen.dart` — интерфейс чата ✅
+- [x] `mood/screens/diary_screen.dart` — дневник настроения ✅
+- [x] `mood/screens/statistics_screen.dart` — статистика и графики ✅
+- [x] Общие виджеты: `message_bubble`, `mood_selector`, `feature_card`, `mood_chart` ✅
 
 ### Вера — Данные и сервисы
 **Директории:** `lib/core/services/`, `lib/features/chat/models/`
@@ -128,11 +136,9 @@ await moodProvider.addEntry(
 - ✅ `hive: ^2.2.3` - Локальное хранилище (для будущего использования)
 - ✅ `hive_flutter: ^1.1.0`
 
-**Опциональные (пока не установлены):**
-```yaml
-dependencies:
-  fl_chart: ^0.66.0         # Графики для статистики
-```
+**Дополнительные зависимости:**
+- ✅ `fl_chart: ^0.66.0` - Графики для статистики (используется в mood_chart.dart)
+- ✅ `sqflite_sqlcipher: ^2.3.0` - Шифрованная SQLite база данных
 
 ## 🔄 Git Workflow
 
@@ -220,9 +226,15 @@ flutter pub upgrade
 ### 📔 Дневник настроения
 - ✅ Добавление/редактирование/удаление записей
 - ✅ Отслеживание эмоций и уровня стресса (1-10)
-- ✅ Статистика и аналитика
+- ✅ Статистика и аналитика с графиками
 - ✅ Фильтрация по дате, эмоциям, стрессу
 - ✅ Экспорт данных для ML
+- ✅ Визуализация данных (линейные графики, круговые диаграммы)
+
+### 🎯 Система рекомендаций
+- ✅ Персонализированные рекомендации на основе настроения
+- ✅ Обратная связь о вмешательствах
+- ✅ Адаптация рекомендаций на основе эффективности
 
 ### 🎨 UI/UX
 - ✅ Material Design 3
