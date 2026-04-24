@@ -12,17 +12,29 @@ import 'package:path_provider/path_provider.dart';
 import '../features/chat/models/chat_message.dart';
 import '../core/services/chatbot_service.dart';
 import '../core/services/chat_repository.dart';
+import '../core/services/clinical_rules_service.dart';
+import '../core/services/ml_service.dart';
+import 'mood_provider.dart' show MoodRepository;
 
 /// Provider для управления состоянием чата
 class ChatProvider extends ChangeNotifier {
   ChatProvider({
     required ChatbotService chatbotService,
     required ChatRepository chatRepository,
+    required MoodRepository moodRepository,
+    required ClinicalRulesService clinicalRulesService,
+    MLService? mlService,
   })  : _chatbotService = chatbotService,
-        _chatRepository = chatRepository;
+        _chatRepository = chatRepository,
+        _moodRepository = moodRepository,
+        _clinicalRulesService = clinicalRulesService,
+        _mlService = mlService ?? MLService();
 
   final ChatbotService _chatbotService;
   final ChatRepository _chatRepository;
+  final MoodRepository _moodRepository;
+  final ClinicalRulesService _clinicalRulesService;
+  final MLService _mlService;
   final List<ChatMessage> _messages = <ChatMessage>[];
 
   bool _isLoading = false;
@@ -100,8 +112,13 @@ class ChatProvider extends ChangeNotifier {
     _setBotTyping(true);
 
     try {
+      final context = await _buildChatContext();
+
       // Получаем ответ от бота
-      final botResponseText = await _chatbotService.generateResponse(text);
+      final botResponseText = await _chatbotService.generateResponse(
+        text,
+        context: context,
+      );
 
       // Создаем сообщение бота
       final botMessage = ChatMessage(
@@ -281,7 +298,60 @@ class ChatProvider extends ChangeNotifier {
         .toList();
   }
 
+  @override
+  void dispose() {
+    _chatbotService.dispose();
+    _mlService.dispose();
+    super.dispose();
+  }
+
   // ============ Private Methods ============
+
+  Future<ChatContext?> _buildChatContext() async {
+    try {
+      final entries = await _moodRepository.fetchEntries();
+      if (entries.length < ClinicalRulesService.minContextDays) {
+        return null;
+      }
+
+      final relevantEntries = entries.take(ClinicalRulesService.maxContextDays).toList();
+      final assessment = _clinicalRulesService.evaluate(relevantEntries);
+
+      await _mlService.initialize();
+      final prediction = await _mlService.predictNextMood(relevantEntries);
+      String? predictedMood;
+      if (prediction.isNotEmpty) {
+        final maxEntry = prediction.entries.reduce(
+          (a, b) => a.value >= b.value ? a : b,
+        );
+        predictedMood = maxEntry.key;
+      }
+
+      final emotionCounts = <String, int>{};
+      for (final e in relevantEntries) {
+        emotionCounts[e.emotion] = (emotionCounts[e.emotion] ?? 0) + 1;
+      }
+      final sortedEmotions = emotionCounts.entries.toList()
+        ..sort((a, b) => b.value.compareTo(a.value));
+      final topEmotions = sortedEmotions.take(3).map((e) => e.key).toList();
+
+      return ChatContext(
+        daysAnalyzed: relevantEntries.length,
+        averageStress: assessment.avgStressNormalized * 10.0,
+        riskLevel: assessment.riskLevel,
+        isCrisis: assessment.isCrisis,
+        triggeredRules: assessment.triggeredRules,
+        predictedMood: predictedMood,
+        topEmotions: topEmotions,
+      );
+    } catch (error, stackTrace) {
+      if (kDebugMode) {
+        debugPrint('Failed to build chat context: $error');
+        debugPrint(stackTrace.toString());
+      }
+      return null;
+    }
+  }
 
   Future<void> _saveMessages() async {
     try {

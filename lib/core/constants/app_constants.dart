@@ -5,7 +5,7 @@ class AppConstants {
   static const String appName = 'Mental Health Companion';
   static const String appVersion = '1.0.0';
   
-  // Emotions List
+  // Emotions — английские ключи везде (совпадают с EMOTION_MAP в train_model.py и выходом TFLite).
   static const List<String> emotions = [
     'Happy',
     'Sad',

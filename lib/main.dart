@@ -6,6 +6,7 @@ import 'providers/chat_provider.dart';
 import 'core/services/mood_repository.dart';
 import 'core/services/chat_repository.dart';
 import 'core/services/chatbot_service.dart';
+import 'core/services/clinical_rules_service.dart';
 import 'core/services/database_service.dart';
 import 'core/routing/app_router.dart';
 
@@ -29,12 +30,14 @@ class MentalHealthApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final moodRepository = SqliteMoodRepository(databaseService);
+
     return MultiProvider(
       providers: [
         // Mood Provider - управление дневником настроения (зашифрованная БД)
         ChangeNotifierProvider(
           create: (_) => MoodProvider(
-            repository: SqliteMoodRepository(databaseService),
+            repository: moodRepository,
           )..loadEntries(),
         ),
         
@@ -43,6 +46,8 @@ class MentalHealthApp extends StatelessWidget {
           create: (_) => ChatProvider(
             chatbotService: ChatbotService(),
             chatRepository: SqliteChatRepository(databaseService),
+            moodRepository: moodRepository,
+            clinicalRulesService: ClinicalRulesService(),
           )..initialize(),
         ),
       ],

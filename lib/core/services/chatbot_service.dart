@@ -1,191 +1,322 @@
+﻿import 'dart:convert';
 import 'dart:math';
 
-/// Сервис для генерации ответов чат-бота
-/// 
-/// Использует простую систему на основе ключевых слов для генерации
-/// поддерживающих ответов. В будущем можно интегрировать ML модель.
+import 'package:http/http.dart' as http;
+
+import 'clinical_rules_service.dart';
+
+class ChatContext {
+  const ChatContext({
+    required this.daysAnalyzed,
+    required this.averageStress,
+    required this.riskLevel,
+    required this.isCrisis,
+    required this.triggeredRules,
+    required this.predictedMood,
+    required this.topEmotions,
+  });
+
+  final int daysAnalyzed;
+  final double averageStress;
+  final RiskLevel riskLevel;
+  final bool isCrisis;
+  final List<String> triggeredRules;
+  final String? predictedMood;
+  final List<String> topEmotions;
+}
+
+/// Chat service with two tiers:
+/// 1) call local backend (/api/v1/support-decision) that can use Qwen,
+/// 2) fallback to lightweight keyword responses.
 class ChatbotService {
-  ChatbotService();
+  ChatbotService({
+    http.Client? httpClient,
+    String? backendBaseUrl,
+    bool? useBackendQwen,
+    String? userId,
+  })  : _httpClient = httpClient ?? http.Client(),
+        _backendBaseUrl = backendBaseUrl ?? _defaultBackendBaseUrl,
+        _useBackendQwen = useBackendQwen ?? _defaultUseBackendQwen,
+        _userId = userId ?? _defaultUserId;
 
   final Random _random = Random();
+  final http.Client _httpClient;
+  final String _backendBaseUrl;
+  final bool _useBackendQwen;
+  final String _userId;
 
-  /// Генерирует ответ бота на основе сообщения пользователя
-  Future<String> generateResponse(String userMessage) async {
-    // Имитация задержки ответа для реалистичности
+  static const bool _defaultUseBackendQwen =
+      bool.fromEnvironment('MH_USE_BACKEND_QWEN', defaultValue: true);
+  static const String _defaultBackendBaseUrl = String.fromEnvironment(
+    'MH_BACKEND_URL',
+    defaultValue: 'http://10.0.2.2:8000',
+  );
+  static const String _defaultUserId = String.fromEnvironment(
+    'MH_USER_ID',
+    defaultValue: 'local_user',
+  );
+
+  Future<String> generateResponse(String userMessage, {ChatContext? context}) async {
+    final trimmed = userMessage.trim();
+    if (trimmed.isEmpty) {
+      return _withContext(_pick(_defaultResponses), context);
+    }
+
+    if (context != null && context.isCrisis) {
+      return _buildCrisisResponse(context);
+    }
+
+    if (_useBackendQwen) {
+      final llmResponse = await _tryGenerateBackendResponse(trimmed, context: context);
+      if (llmResponse != null && llmResponse.isNotEmpty) {
+        return llmResponse;
+      }
+    }
+
     await Future.delayed(Duration(milliseconds: 500 + _random.nextInt(1000)));
-
-    final message = userMessage.toLowerCase().trim();
-
-    // Проверка на приветствия
-    if (_containsAny(message, ['привет', 'здравствуй', 'добрый день', 'хай', 'hello', 'hi'])) {
-      return _getRandomResponse(_greetingResponses);
-    }
-
-    // Проверка на прощания
-    if (_containsAny(message, ['пока', 'до свидания', 'увидимся', 'bye', 'goodbye'])) {
-      return _getRandomResponse(_farewellResponses);
-    }
-
-    // Проверка на благодарности
-    if (_containsAny(message, ['спасибо', 'благодарю', 'thanks', 'thank you'])) {
-      return _getRandomResponse(_gratitudeResponses);
-    }
-
-    // Проверка на вопросы о самочувствии
-    if (_containsAny(message, ['как дела', 'как ты', 'что делаешь'])) {
-      return _getRandomResponse(_botStatusResponses);
-    }
-
-    // Негативные эмоции
-    if (_containsAny(message, ['грустно', 'плохо', 'депрессия', 'тревога', 'страх', 'паника', 'устал', 'больно'])) {
-      return _getRandomResponse(_supportiveResponses);
-    }
-
-    // Позитивные эмоции
-    if (_containsAny(message, ['хорошо', 'радость', 'счастлив', 'отлично', 'весело', 'круто'])) {
-      return _getRandomResponse(_positiveResponses);
-    }
-
-    // Вопросы о помощи
-    if (_containsAny(message, ['помоги', 'помощь', 'что делать', 'как быть', 'совет'])) {
-      return _getRandomResponse(_helpResponses);
-    }
-
-    // Стресс и работа
-    if (_containsAny(message, ['стресс', 'работа', 'учеба', 'экзамен', 'дедлайн'])) {
-      return _getRandomResponse(_stressResponses);
-    }
-
-    // Проблемы со сном
-    if (_containsAny(message, ['сон', 'бессонница', 'не сплю', 'устал'])) {
-      return _getRandomResponse(_sleepResponses);
-    }
-
-    // Отношения
-    if (_containsAny(message, ['отношения', 'друзья', 'семья', 'конфликт', 'ссора'])) {
-      return _getRandomResponse(_relationshipResponses);
-    }
-
-    // Дефолтный ответ, если не найдено ключевых слов
-    return _getRandomResponse(_defaultResponses);
+    return _fallbackResponse(trimmed.toLowerCase(), context);
   }
 
-  /// Приветственное сообщение при первом запуске
   String getWelcomeMessage() {
-    return 'Привет! Я твой помощник в отслеживании ментального здоровья. '
-        'Ты можешь поделиться со мной своими чувствами, задать вопрос или просто поговорить. '
-        'Как твое настроение сегодня?';
+    return 'Hi. I am your support companion. '
+        'You can share how you feel, and I can suggest small steps. '
+        'How are you feeling today?';
   }
 
-  /// Проверяет, содержит ли текст хотя бы одно из ключевых слов
+  void dispose() {
+    _httpClient.close();
+  }
+
+  Future<String?> _tryGenerateBackendResponse(
+    String userMessage, {
+    ChatContext? context,
+  }) async {
+    final endpoint = Uri.parse('$_backendBaseUrl/api/v1/support-decision');
+
+    try {
+      final response = await _httpClient
+          .post(
+            endpoint,
+            headers: const <String, String>{'Content-Type': 'application/json'},
+            body: jsonEncode(_buildSupportDecisionPayload(userMessage, context: context)),
+          )
+          .timeout(const Duration(seconds: 12));
+
+      if (response.statusCode < 200 || response.statusCode >= 300) {
+        return null;
+      }
+
+      final decoded = jsonDecode(response.body);
+      if (decoded is! Map<String, dynamic>) {
+        return null;
+      }
+
+      final llmResponse = decoded['llm_response'];
+      if (llmResponse is String && llmResponse.trim().isNotEmpty) {
+        return llmResponse.trim();
+      }
+    } catch (_) {
+      // Network or parse failure: fallback is used silently.
+    }
+
+    return null;
+  }
+
+  Map<String, dynamic> _buildSupportDecisionPayload(
+    String userMessage, {
+    ChatContext? context,
+  }) {
+    final stress = _deriveStress(context);
+
+    final sleepQuality = _scoreFromStress(stress + 1.0);
+    final sleepRegularity = _scoreFromStress(stress);
+    final socialConnectedness = _scoreFromStress(stress);
+    final routineRegularity = _scoreFromStress(stress + 0.5);
+
+    final physicalActivityMinutes = (70 - (stress * 5)).clamp(0, 180).round();
+    final sedentaryMinutes = (660 + (stress * 22)).clamp(240, 1320).round();
+    final outdoorMinutes = (55 - (stress * 4)).clamp(0, 180).round();
+    final sleepDurationHours = (8.2 - (stress * 0.35)).clamp(3.5, 9.5);
+
+    return <String, dynamic>{
+      'wellbeing': <String, dynamic>{
+        'user_id': _userId,
+        'client_timestamp': DateTime.now().toUtc().toIso8601String(),
+        'signals': <String, dynamic>{
+          'emotion_marker': _deriveEmotionMarker(context),
+          'diary_note': userMessage,
+          'sleep_duration_hours': sleepDurationHours,
+          'sleep_regularity': sleepRegularity,
+          'sleep_quality': sleepQuality,
+          'physical_activity_minutes': physicalActivityMinutes,
+          'sedentary_minutes': sedentaryMinutes,
+          'outdoor_minutes': outdoorMinutes,
+          'social_connectedness': socialConnectedness,
+          'routine_regularity': routineRegularity,
+        },
+      },
+      'latest_user_message': userMessage,
+      'latest_diary_note': userMessage,
+      'dialogue_state': const <String, dynamic>{'state': 'followup_wait'},
+      'client_safety_precheck_result': <String, dynamic>{
+        'safe_response_required': context?.isCrisis ?? false,
+        'flags': context?.triggeredRules ?? const <String>[],
+      },
+    };
+  }
+
+  double _deriveStress(ChatContext? context) {
+    if (context == null) return 5.0;
+    return context.averageStress.clamp(1.0, 10.0);
+  }
+
+  int _scoreFromStress(double stress) {
+    return (6 - (stress / 2.0).round()).clamp(1, 5).toInt();
+  }
+
+  String _deriveEmotionMarker(ChatContext? context) {
+    final predicted = context?.predictedMood?.trim();
+    if (predicted != null && predicted.isNotEmpty) {
+      return predicted.toLowerCase();
+    }
+
+    if (context != null && context.topEmotions.isNotEmpty) {
+      final top = context.topEmotions.first.trim();
+      if (top.isNotEmpty) {
+        return top.toLowerCase();
+      }
+    }
+
+    return 'neutral';
+  }
+
+  String _fallbackResponse(String message, ChatContext? context) {
+    if (_containsAny(message, <String>['hi', 'hello', 'hey', 'привет'])) {
+      return _withContext(_pick(_greetingResponses), context);
+    }
+
+    if (_containsAny(message, <String>['bye', 'goodbye', 'пока'])) {
+      return _pick(_farewellResponses);
+    }
+
+    if (_containsAny(message, <String>['thank', 'thanks', 'спасибо'])) {
+      return _pick(_gratitudeResponses);
+    }
+
+    if (_containsAny(message, <String>['stress', 'anxious', 'panic', 'тревог', 'стресс'])) {
+      return _withContext(_pick(_stressResponses), context);
+    }
+
+    if (_containsAny(message, <String>['sad', 'depress', 'tired', 'груст', 'плохо', 'устал'])) {
+      return _withContext(_pick(_supportiveResponses), context);
+    }
+
+    if (_containsAny(message, <String>['sleep', 'insomnia', 'сон', 'бессон'])) {
+      return _withContext(_pick(_sleepResponses), context);
+    }
+
+    if (_containsAny(message, <String>['help', 'advice', 'помоги', 'совет'])) {
+      return _withContext(_pick(_helpResponses), context);
+    }
+
+    if (_containsAny(message, <String>['good', 'great', 'happy', 'рад', 'хорошо'])) {
+      return _pick(_positiveResponses);
+    }
+
+    return _withContext(_pick(_defaultResponses), context);
+  }
+
   bool _containsAny(String text, List<String> keywords) {
     return keywords.any((keyword) => text.contains(keyword));
   }
 
-  /// Возвращает случайный ответ из списка
-  String _getRandomResponse(List<String> responses) {
-    return responses[_random.nextInt(responses.length)];
+  String _pick(List<String> values) {
+    return values[_random.nextInt(values.length)];
   }
 
-  // ============ Шаблоны ответов ============
+  String _withContext(String base, ChatContext? context) {
+    if (context == null) return base;
 
-  static const List<String> _greetingResponses = [
-    'Привет! Рад тебя видеть. Как ты себя чувствуешь?',
-    'Здравствуй! Как твои дела сегодня?',
-    'Привет! Я здесь, чтобы поддержать тебя. Что у тебя нового?',
-    'Добрый день! Расскажи, как прошел твой день?',
+    final riskHint = _riskToHint(context.riskLevel);
+    final moodHint = context.predictedMood != null
+        ? ' Predicted next mood: ${context.predictedMood}.'
+        : '';
+    final emotionHint = context.topEmotions.isEmpty
+        ? ''
+        : ' Frequent emotions in the last ${context.daysAnalyzed} days: ${context.topEmotions.join(', ')}.';
+
+    return '$base\n\n$riskHint$moodHint$emotionHint';
+  }
+
+  String _riskToHint(RiskLevel level) {
+    switch (level) {
+      case RiskLevel.low:
+        return 'Current diary risk: low.';
+      case RiskLevel.moderate:
+        return 'Current diary risk: moderate. Keep sleep and rest stable if possible.';
+      case RiskLevel.high:
+        return 'Current diary risk: high. Consider reducing load and talking to someone you trust.';
+      case RiskLevel.crisis:
+        return 'Current diary risk: crisis.';
+    }
+  }
+
+  String _buildCrisisResponse(ChatContext context) {
+    final triggers = context.triggeredRules.isEmpty
+        ? 'we detected concerning signals'
+        : 'detected triggers: ${context.triggeredRules.join(', ')}';
+
+    return 'Your safety matters first. Based on recent data, $triggers. '
+        'If there is any risk of harm to yourself, call emergency services now (112) '
+        'or contact a trusted person immediately. '
+        'If you can, try 2 minutes of slow breathing: inhale 4 sec, hold 2 sec, exhale 6 sec.';
+  }
+
+  static const List<String> _greetingResponses = <String>[
+    'Hi. I am here with you. What feels most difficult right now?',
+    'Hello. Thanks for checking in. How has your day been so far?',
+    'Hey. You can share as much or as little as you want.',
   ];
 
-  static const List<String> _farewellResponses = [
-    'До встречи! Береги себя! 💜',
-    'Пока! Буду рад пообщаться снова.',
-    'До свидания! Не забывай заботиться о себе.',
-    'Увидимся! Всегда рад помочь.',
+  static const List<String> _farewellResponses = <String>[
+    'See you later. Take care of yourself.',
+    'Goodbye. I am here whenever you want to check in again.',
   ];
 
-  static const List<String> _gratitudeResponses = [
-    'Всегда пожалуйста! Я рад помочь.',
-    'Не за что! Обращайся, если что-то понадобится.',
-    'Рад был быть полезным! 💜',
-    'Пожалуйста! Заботься о себе.',
+  static const List<String> _gratitudeResponses = <String>[
+    'You are welcome.',
+    'Glad to help. We can continue whenever you want.',
   ];
 
-  static const List<String> _botStatusResponses = [
-    'У меня все отлично! Главное - как у тебя дела?',
-    'Спасибо, что спросил! Я здесь, чтобы поддержать тебя. Как ты?',
-    'Я в порядке! Давай лучше о тебе поговорим.',
+  static const List<String> _supportiveResponses = <String>[
+    'That sounds heavy. Thank you for saying it out loud.',
+    'I hear you. It is okay to take this one small step at a time.',
+    'What you feel is valid. We can focus on one manageable action now.',
   ];
 
-  static const List<String> _supportiveResponses = [
-    'Мне жаль, что тебе сейчас тяжело. Помни, что эти чувства временны. '
-        'Я здесь, чтобы выслушать тебя.',
-    'Понимаю, как тебе сейчас непросто. Попробуй сделать несколько глубоких вдохов. '
-        'Хочешь, я подскажу упражнение для расслабления?',
-    'Ты не один в своих переживаниях. Многие проходят через подобное. '
-        'Попробуй записать свои мысли в дневник - это может помочь.',
-    'Иногда нам всем бывает тяжело, и это нормально. Важно признавать свои чувства. '
-        'Что могло бы тебе сейчас помочь?',
-    'Твои чувства важны. Если становится совсем тяжело, подумай о том, чтобы '
-        'поговорить с близким человеком или специалистом.',
+  static const List<String> _positiveResponses = <String>[
+    'That is good to hear. Notice what helped, and keep that pattern.',
+    'Great. Holding onto small positive moments can build stability.',
   ];
 
-  static const List<String> _positiveResponses = [
-    'Как здорово! Радуюсь за тебя! 😊',
-    'Отлично! Ценить хорошие моменты очень важно.',
-    'Прекрасно слышать! Не забудь записать это в дневник настроения.',
-    'Замечательно! Что именно сделало твой день таким хорошим?',
+  static const List<String> _helpResponses = <String>[
+    'We can pick one small step: breathing, a short walk, or a glass of water.',
+    'If you want, tell me what feels hardest right now and we will narrow it down.',
   ];
 
-  static const List<String> _helpResponses = [
-    'Я могу помочь тебе отслеживать твое настроение, дать советы по управлению стрессом '
-        'или просто выслушать. С чего начнем?',
-    'Попробуй начать с дневника настроения - это поможет отследить паттерны. '
-        'Также у меня есть раздел с полезными практиками.',
-    'Важный шаг - признать, что тебе нужна помощь. Попробуй техники дыхания, медитацию '
-        'или веди дневник. А если становится тяжело - обратись к специалисту.',
-    'Я здесь, чтобы поддержать тебя. Расскажи подробнее, что тебя беспокоит?',
+  static const List<String> _stressResponses = <String>[
+    'Stress can narrow attention. Try a 60-second reset: slow inhale, longer exhale.',
+    'When stress is high, reduce scope: choose the smallest next action only.',
   ];
 
-  static const List<String> _stressResponses = [
-    'Стресс - естественная реакция организма. Попробуй технику "5-4-3-2-1": '
-        'назови 5 вещей, которые видишь, 4 - которые слышишь, 3 - которые чувствуешь, '
-        '2 - которые чувствуешь запах, 1 - которую чувствуешь вкус.',
-    'Когда стресса много, важно делать перерывы. Попробуй короткую прогулку '
-        'или 5 минут дыхательных упражнений.',
-    'Разбей большую задачу на маленькие шаги. Сосредоточься на том, что можешь '
-        'контролировать прямо сейчас.',
-    'Помни о правиле "20-20-20": каждые 20 минут смотри на объект в 20 метрах '
-        'от себя в течение 20 секунд. Это снизит напряжение.',
+  static const List<String> _sleepResponses = <String>[
+    'Sleep strongly affects mood. A simple target is a consistent bedtime this week.',
+    'For tonight, try a short wind-down without screens before sleep.',
   ];
 
-  static const List<String> _sleepResponses = [
-    'Качественный сон очень важен для ментального здоровья. Попробуй установить '
-        'режим: ложись и вставай в одно время.',
-    'Перед сном избегай экранов за час. Попробуй почитать книгу или послушать '
-        'спокойную музыку.',
-    'Создай комфортную атмосферу: прохладная комната, темнота, тишина. '
-        'Попробуй техники расслабления перед сном.',
-    'Если не можешь уснуть 20 минут, встань и займись чем-то спокойным, '
-        'пока не почувствуешь сонливость.',
-  ];
-
-  static const List<String> _relationshipResponses = [
-    'Отношения бывают сложными. Важно открыто говорить о своих чувствах и '
-        'слушать других.',
-    'Конфликты - это нормально. Главное - разрешать их конструктивно. '
-        'Попробуй использовать "Я-сообщения" вместо обвинений.',
-    'Иногда нужно время, чтобы остыть перед серьезным разговором. '
-        'Это нормально - взять паузу.',
-    'Помни, что ты не можешь контролировать других людей, только свою реакцию. '
-        'Установи здоровые границы.',
-  ];
-
-  static const List<String> _defaultResponses = [
-    'Понимаю. Расскажи мне больше о том, что ты чувствуешь.',
-    'Интересно. Как это влияет на тебя?',
-    'Я здесь, чтобы выслушать тебя. Продолжай.',
-    'Спасибо, что поделился со мной. Что еще у тебя на уме?',
-    'Я понимаю. Как ты обычно справляешься с такими ситуациями?',
-    'Это важно. Попробуй записать свои мысли в дневник настроения.',
+  static const List<String> _defaultResponses = <String>[
+    'I hear you. Tell me a bit more about what you are feeling now.',
+    'Thanks for sharing. What would feel most supportive in this moment?',
+    'We can move slowly. What is one small thing that might help right now?',
   ];
 }

@@ -12,7 +12,6 @@ lib/
 │   ├── routing/app_router.dart        # ✅ Навигация (GoRouter)
 │   └── services/                      # Бизнес-логика и ML
 │       ├── database_service.dart      # ✅ Шифрованная SQLite
-│       ├── analytics_service.dart     # ✅ Аналитика и советы
 │       ├── chatbot_service.dart       # ✅ Логика чат-бота
 │       ├── ml_service.dart            # ✅ TFLite inference
 │       ├── mood_repository.dart       # ✅ Репозиторий дневника
@@ -55,7 +54,6 @@ lib/
 - [x] `chat/models/chat_message.dart` — модель сообщения ✅
 - [x] `core/services/storage_service.dart` — локальное хранение ✅
 - [x] `core/services/mood_repository.dart` — репозиторий дневника ✅
-- [x] `core/services/analytics_service.dart` — аналитика ✅
 - [ ] Улучшения ML/Analytics по данным пользователей
 
 ### Настя — Архитектура, провайдеры, ML
@@ -133,6 +131,12 @@ await moodProvider.addEntry(
 dependencies:
   fl_chart: ^0.66.0         # Графики для статистики
 ```
+
+## 🗃️ Архив legacy ML
+
+- Экспериментальные ML-скрипты перенесены в `legacy/ml/`.
+- Документ `ML_INTEGRATION.md` перенесен в `legacy/ML_INTEGRATION.md`.
+- Эта часть оставлена только как исторический архив и не является активной MVP-архитектурой backend-бота.
 
 ## 🔄 Git Workflow
 
