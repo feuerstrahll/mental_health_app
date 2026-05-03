@@ -1,134 +1,129 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 
-/// Statistics Screen - Displays graphs and observations
-/// 
-/// Features to implement:
-/// - Emotion trends over time (line/bar charts)
-/// - Stress level patterns (graphs)
-/// - Weekly/monthly summaries
-/// - Insights and observations based on patterns
-/// - Export statistics functionality
-/// 
-/// Charts to consider:
-/// - Line chart for emotion trends
-/// - Bar chart for emotion frequency
-/// - Heatmap for daily mood patterns
-/// - Stress level timeline
+import '../../../core/constants/app_constants.dart';
+import '../../../providers/mood_provider.dart';
+import '../../../widgets/app_shell.dart';
 
-class StatisticsScreen extends StatelessWidget {
+class StatisticsScreen extends StatefulWidget {
   const StatisticsScreen({super.key});
 
   @override
+  State<StatisticsScreen> createState() => _StatisticsScreenState();
+}
+
+class _StatisticsScreenState extends State<StatisticsScreen> {
+  int _periodDays = 7;
+
+  @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Statistics & Insights'),
-        backgroundColor: Theme.of(context).colorScheme.primary,
-        foregroundColor: Colors.white,
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
+    final provider = context.watch<MoodProvider>();
+    final now = DateTime.now();
+    final entries = provider.filterByDateRange(now.subtract(Duration(days: _periodDays)), now);
+    final avgStress = provider.averageStressFor(entries);
+    final observations = provider.generateObservations(lookbackDays: _periodDays);
+
+    return AppShell(
+      title: 'Прогресс',
+      currentRoute: AppRoutes.progress,
+      backgroundColor: AppColors.sage,
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.fromLTRB(16, 18, 16, 118),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Welcome header
-            Text(
-              'Your Mental Health Journey',
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
+            Wrap(
+              spacing: 8,
+              children: [
+                for (final days in [7, 14, 30])
+                  ChoiceChip(
+                    label: Text('$days дней'),
+                    selected: _periodDays == days,
+                    selectedColor: AppColors.forest.withOpacity(0.22),
+                    onSelected: (_) => setState(() => _periodDays = days),
                   ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Track your progress and discover patterns',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Colors.grey[600],
-                  ),
-            ),
-            const SizedBox(height: 24),
-
-            // Placeholder cards for different statistics
-            _StatisticCard(
-              title: 'Emotion Trends',
-              description: 'See how your emotions change over time',
-              icon: Icons.timeline,
-              color: Colors.blue,
-              onTap: () {
-                // TODO: Navigate to detailed emotion trends
-              },
-            ),
-            const SizedBox(height: 16),
-            
-            _StatisticCard(
-              title: 'Stress Patterns',
-              description: 'Analyze your stress levels throughout the week',
-              icon: Icons.show_chart,
-              color: Colors.orange,
-              onTap: () {
-                // TODO: Navigate to stress analysis
-              },
-            ),
-            const SizedBox(height: 16),
-            
-            _StatisticCard(
-              title: 'Monthly Summary',
-              description: 'Review your overall mental health this month',
-              icon: Icons.calendar_today,
-              color: Colors.green,
-              onTap: () {
-                // TODO: Navigate to monthly summary
-              },
-            ),
-            const SizedBox(height: 16),
-            
-            _StatisticCard(
-              title: 'Insights & Observations',
-              description: 'Personalized insights based on your data',
-              icon: Icons.lightbulb_outline,
-              color: Colors.purple,
-              onTap: () {
-                // TODO: Navigate to insights
-              },
-            ),
-            const SizedBox(height: 24),
-
-            // Information card
-            Card(
-              color: Colors.blue.shade50,
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.info_outline,
-                      color: Colors.blue.shade700,
-                      size: 32,
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Coming Soon',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: Colors.blue.shade900,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            'Start logging your emotions in the Diary to see statistics and insights here.',
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: Colors.blue.shade700,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
+                ChoiceChip(
+                  label: const Text('свой период'),
+                  selected: false,
+                  onSelected: (_) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Выбор своего периода можно подключить позже')),
+                    );
+                  },
                 ),
+              ],
+            ),
+            const SizedBox(height: 14),
+            SoftCard(
+              color: const Color(0xFFFFEFC8),
+              child: Row(
+                children: [
+                  const Icon(Icons.insights_rounded, color: AppColors.forest, size: 34),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      entries.isEmpty
+                          ? 'За выбранный период пока нет записей. Заполни дневник, чтобы увидеть динамику.'
+                          : 'За $_periodDays дней записей: ${entries.length}. Средний стресс: ${avgStress?.toStringAsFixed(1) ?? '—'}/10.',
+                      style: const TextStyle(color: AppColors.brown, height: 1.3, fontWeight: FontWeight.w600),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+            _MiniChartCard(
+              title: 'Настроение',
+              icon: Icons.mood_rounded,
+              values: _mockValues(entries.length, 6),
+            ),
+            _MiniChartCard(
+              title: 'Длительность сна',
+              icon: Icons.bedtime_rounded,
+              values: _mockValues(entries.length, 5),
+            ),
+            _MiniChartCard(
+              title: 'Качество сна',
+              icon: Icons.nightlight_round,
+              values: _mockValues(entries.length, 4),
+            ),
+            _MiniChartCard(
+              title: 'Активность',
+              icon: Icons.directions_walk_rounded,
+              values: _mockValues(entries.length, 5),
+            ),
+            _MiniChartCard(
+              title: 'Время на улице',
+              icon: Icons.wb_sunny_rounded,
+              values: _mockValues(entries.length, 3),
+            ),
+            _MiniChartCard(
+              title: 'Социальность',
+              icon: Icons.people_alt_rounded,
+              values: _mockValues(entries.length, 4),
+            ),
+            _MiniChartCard(
+              title: 'Регулярность рутины',
+              icon: Icons.event_repeat_rounded,
+              values: _mockValues(entries.length, 5),
+            ),
+            SoftCard(
+              onTap: () => context.go(AppRoutes.tips),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text('Какие советы чаще помогали', style: TextStyle(color: AppColors.brown, fontSize: 18, fontWeight: FontWeight.w900)),
+                  const SizedBox(height: 8),
+                  Text(
+                    observations.isEmpty
+                        ? 'После реакций на советы здесь появится персональный вывод.'
+                        : observations.join('\n'),
+                    style: const TextStyle(color: AppColors.brown, height: 1.35),
+                  ),
+                  const SizedBox(height: 8),
+                  const Text('Открыть советы →', style: TextStyle(color: AppColors.forest, fontWeight: FontWeight.w900)),
+                ],
               ),
             ),
           ],
@@ -136,76 +131,60 @@ class StatisticsScreen extends StatelessWidget {
       ),
     );
   }
+
+  List<double> _mockValues(int entriesCount, int seed) {
+    final count = entriesCount == 0 ? 7 : entriesCount.clamp(3, 10).toInt();
+    return List.generate(count, (index) => ((index + seed) % 5 + 1) / 5);
+  }
 }
 
-class _StatisticCard extends StatelessWidget {
-  final String title;
-  final String description;
-  final IconData icon;
-  final Color color;
-  final VoidCallback onTap;
+class _MiniChartCard extends StatelessWidget {
+  const _MiniChartCard({required this.title, required this.icon, required this.values});
 
-  const _StatisticCard({
-    required this.title,
-    required this.description,
-    required this.icon,
-    required this.color,
-    required this.onTap,
-  });
+  final String title;
+  final IconData icon;
+  final List<double> values;
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      elevation: 2,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: color.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(
-                  icon,
-                  color: color,
-                  size: 32,
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: SoftCard(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(icon, color: AppColors.forest),
+                const SizedBox(width: 8),
+                Text(title, style: const TextStyle(color: AppColors.brown, fontSize: 17, fontWeight: FontWeight.w900)),
+              ],
+            ),
+            const SizedBox(height: 14),
+            SizedBox(
+              height: 72,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: values.map((value) {
+                  return Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 3),
+                      child: FractionallySizedBox(
+                        heightFactor: value.clamp(0.12, 1),
+                        alignment: Alignment.bottomCenter,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: AppColors.forest.withOpacity(0.68),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
                       ),
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      description,
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey[600],
-                      ),
-                    ),
-                  ],
-                ),
+                  );
+                }).toList(),
               ),
-              Icon(
-                Icons.arrow_forward_ios,
-                color: Colors.grey[400],
-                size: 16,
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

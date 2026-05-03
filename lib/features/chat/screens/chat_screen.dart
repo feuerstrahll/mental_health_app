@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../../core/constants/app_constants.dart';
 import '../../../providers/chat_provider.dart';
+import '../../../widgets/app_shell.dart';
 import '../models/chat_message.dart';
 
-/// Экран чата с ботом-помощником
 class ChatScreen extends StatefulWidget {
   const ChatScreen({super.key});
 
@@ -16,6 +17,14 @@ class _ChatScreenState extends State<ChatScreen> {
   final TextEditingController _messageController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
 
+  final List<String> _quickPhrases = const [
+    'Мне тревожно',
+    'Я устал(а)',
+    'Хочу просто поговорить',
+    'Не знаю, что чувствую',
+    'Помоги успокоиться',
+  ];
+
   @override
   void dispose() {
     _messageController.dispose();
@@ -23,20 +32,18 @@ class _ChatScreenState extends State<ChatScreen> {
     super.dispose();
   }
 
-  void _sendMessage() {
-    final text = _messageController.text.trim();
+  void _sendMessage([String? forcedText]) {
+    final text = (forcedText ?? _messageController.text).trim();
     if (text.isEmpty) return;
 
-    final chatProvider = context.read<ChatProvider>();
-    chatProvider.sendMessage(text);
+    context.read<ChatProvider>().sendMessage(text);
     _messageController.clear();
 
-    // Прокручиваем вниз после отправки
-    Future.delayed(const Duration(milliseconds: 100), () {
+    Future.delayed(const Duration(milliseconds: 120), () {
       if (_scrollController.hasClients) {
         _scrollController.animateTo(
           _scrollController.position.maxScrollExtent,
-          duration: const Duration(milliseconds: 300),
+          duration: const Duration(milliseconds: 250),
           curve: Curves.easeOut,
         );
       }
@@ -45,290 +52,227 @@ class _ChatScreenState extends State<ChatScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Чат с помощником'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.delete_outline),
-            tooltip: 'Очистить историю',
-            onPressed: () => _showClearHistoryDialog(context),
-          ),
-          IconButton(
-            icon: const Icon(Icons.file_download),
-            tooltip: 'Экспорт истории',
-            onPressed: () => _exportHistory(context),
-          ),
-        ],
-      ),
-      body: Consumer<ChatProvider>(
-        builder: (context, chatProvider, child) {
+    return AppShell(
+      title: 'Поговорить',
+      currentRoute: AppRoutes.chat,
+      backgroundColor: const Color(0xFFFFEFD8),
+      child: Consumer<ChatProvider>(
+        builder: (context, chatProvider, _) {
           if (chatProvider.isLoading && !chatProvider.isInitialized) {
-            return const Center(
-              child: CircularProgressIndicator(),
-            );
+            return const Center(child: CircularProgressIndicator());
           }
 
-          if (chatProvider.hasError) {
-            return Center(
+          return Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [Color(0xFFFFE2BC), Color(0xFFFFF6E4)],
+              ),
+            ),
+            child: SafeArea(
+              top: false,
+              bottom: false,
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.error_outline, size: 64, color: Colors.red),
-                  const SizedBox(height: 16),
-                  Text(
-                    chatProvider.errorMessage ?? 'Произошла ошибка',
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(color: Colors.red),
+                  const _RoomHeader(),
+                  _QuickPhrases(
+                    phrases: _quickPhrases,
+                    onTap: (phrase) => _sendMessage(phrase),
                   ),
-                  const SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: () => chatProvider.initialize(),
-                    child: const Text('Попробовать снова'),
+                  Expanded(
+                    child: chatProvider.messages.isEmpty
+                        ? const _EmptyChat()
+                        : ListView.builder(
+                            controller: _scrollController,
+                            padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+                            itemCount: chatProvider.messages.length,
+                            itemBuilder: (context, index) {
+                              return _MessageBubble(message: chatProvider.messages[index]);
+                            },
+                          ),
                   ),
+                  if (chatProvider.isBotTyping)
+                    const Padding(
+                      padding: EdgeInsets.fromLTRB(18, 0, 18, 8),
+                      child: Row(
+                        children: [
+                          Icon(Icons.more_horiz_rounded, color: AppColors.brown),
+                          SizedBox(width: 8),
+                          Text('Печатает...', style: TextStyle(color: AppColors.brown, fontStyle: FontStyle.italic)),
+                        ],
+                      ),
+                    ),
+                  _MessageInput(
+                    controller: _messageController,
+                    enabled: !chatProvider.isBotTyping,
+                    onSend: () => _sendMessage(),
+                  ),
+                  const SizedBox(height: 96),
                 ],
               ),
-            );
-          }
-
-          return Column(
-            children: [
-              // Список сообщений
-              Expanded(
-                child: chatProvider.messages.isEmpty
-                    ? const Center(
-                        child: Text('Нет сообщений'),
-                      )
-                    : ListView.builder(
-                        controller: _scrollController,
-                        padding: const EdgeInsets.all(16),
-                        itemCount: chatProvider.messages.length,
-                        itemBuilder: (context, index) {
-                          final message = chatProvider.messages[index];
-                          return _MessageBubble(
-                            message: message,
-                            onDelete: () => chatProvider.deleteMessage(message.id),
-                          );
-                        },
-                      ),
-              ),
-
-              // Индикатор печатания бота
-              if (chatProvider.isBotTyping)
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  alignment: Alignment.centerLeft,
-                  child: Row(
-                    children: [
-                      CircleAvatar(
-                        backgroundColor: Colors.deepPurple.shade100,
-                        radius: 16,
-                        child: const Icon(Icons.smart_toy, size: 16),
-                      ),
-                      const SizedBox(width: 12),
-                      const Text(
-                        'Печатает...',
-                        style: TextStyle(
-                          fontStyle: FontStyle.italic,
-                          color: Colors.grey,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
-              // Поле ввода сообщения
-              Container(
-                decoration: BoxDecoration(
-                  color: Theme.of(context).cardColor,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.1),
-                      blurRadius: 4,
-                      offset: const Offset(0, -2),
-                    ),
-                  ],
-                ),
-                padding: const EdgeInsets.all(8),
-                child: SafeArea(
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: TextField(
-                          controller: _messageController,
-                          decoration: InputDecoration(
-                            hintText: 'Напишите сообщение...',
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(24),
-                            ),
-                            contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 12,
-                            ),
-                          ),
-                          maxLines: null,
-                          textInputAction: TextInputAction.send,
-                          onSubmitted: (_) => _sendMessage(),
-                          enabled: !chatProvider.isBotTyping,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      IconButton(
-                        icon: const Icon(Icons.send),
-                        onPressed: chatProvider.isBotTyping ? null : _sendMessage,
-                        color: Colors.deepPurple,
-                        iconSize: 28,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
+            ),
           );
         },
       ),
     );
   }
+}
 
-  void _showClearHistoryDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Очистить историю?'),
-        content: const Text(
-          'Вся история сообщений будет удалена. Это действие нельзя отменить.',
+class _RoomHeader extends StatelessWidget {
+  const _RoomHeader();
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(18, 14, 18, 6),
+      child: SoftCard(
+        color: const Color(0xFFFFF7E8),
+        child: Row(
+          children: [
+            Container(
+              width: 56,
+              height: 56,
+              decoration: const BoxDecoration(color: Color(0xFFFFD59E), shape: BoxShape.circle),
+              child: const Icon(Icons.weekend_rounded, color: AppColors.brown, size: 30),
+            ),
+            const SizedBox(width: 14),
+            const Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Уютная комната', style: TextStyle(color: AppColors.brown, fontSize: 19, fontWeight: FontWeight.w900)),
+                  SizedBox(height: 4),
+                  Text('Можно написать как есть. Без оценки и спешки.', style: TextStyle(color: AppColors.brown, height: 1.25)),
+                ],
+              ),
+            ),
+          ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Отмена'),
+      ),
+    );
+  }
+}
+
+class _QuickPhrases extends StatelessWidget {
+  const _QuickPhrases({required this.phrases, required this.onTap});
+
+  final List<String> phrases;
+  final ValueChanged<String> onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 44,
+      child: ListView.separated(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        scrollDirection: Axis.horizontal,
+        itemBuilder: (context, index) {
+          final phrase = phrases[index];
+          return ActionChip(
+            backgroundColor: AppColors.card,
+            label: Text(phrase, style: const TextStyle(color: AppColors.brown)),
+            onPressed: () => onTap(phrase),
+          );
+        },
+        separatorBuilder: (_, __) => const SizedBox(width: 8),
+        itemCount: phrases.length,
+      ),
+    );
+  }
+}
+
+class _MessageInput extends StatelessWidget {
+  const _MessageInput({required this.controller, required this.enabled, required this.onSend});
+
+  final TextEditingController controller;
+  final bool enabled;
+  final VoidCallback onSend;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.fromLTRB(14, 6, 14, 0),
+      padding: const EdgeInsets.all(8),
+      decoration: BoxDecoration(
+        color: AppColors.card,
+        borderRadius: BorderRadius.circular(28),
+        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.08), blurRadius: 12, offset: const Offset(0, 4))],
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: TextField(
+              controller: controller,
+              enabled: enabled,
+              minLines: 1,
+              maxLines: 4,
+              decoration: const InputDecoration(
+                hintText: 'Напиши сообщение...',
+                border: InputBorder.none,
+                contentPadding: EdgeInsets.symmetric(horizontal: 14),
+              ),
+              textInputAction: TextInputAction.send,
+              onSubmitted: (_) => onSend(),
+            ),
           ),
-          TextButton(
-            onPressed: () {
-              context.read<ChatProvider>().clearHistory();
-              Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('История очищена')),
-              );
-            },
-            child: const Text('Очистить', style: TextStyle(color: Colors.red)),
+          IconButton.filled(
+            onPressed: enabled ? onSend : null,
+            icon: const Icon(Icons.arrow_upward_rounded),
+            style: IconButton.styleFrom(backgroundColor: AppColors.forest, foregroundColor: AppColors.cream),
           ),
         ],
       ),
     );
   }
-
-  Future<void> _exportHistory(BuildContext context) async {
-    final chatProvider = context.read<ChatProvider>();
-    final result = await chatProvider.exportHistory();
-    
-    if (context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(result)),
-      );
-    }
-  }
 }
 
-/// Виджет для отображения одного сообщения
 class _MessageBubble extends StatelessWidget {
-  const _MessageBubble({
-    required this.message,
-    required this.onDelete,
-  });
+  const _MessageBubble({required this.message});
 
   final ChatMessage message;
-  final VoidCallback onDelete;
 
   @override
   Widget build(BuildContext context) {
     final isUser = message.isFromUser;
-    
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Row(
-        mainAxisAlignment:
-            isUser ? MainAxisAlignment.end : MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          if (!isUser) ...[
-            CircleAvatar(
-              backgroundColor: Colors.deepPurple.shade100,
-              radius: 16,
-              child: const Icon(Icons.smart_toy, size: 16),
-            ),
-            const SizedBox(width: 8),
-          ],
-          Flexible(
-            child: GestureDetector(
-              onLongPress: isUser ? onDelete : null,
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 12,
-                ),
-                decoration: BoxDecoration(
-                  color: isUser
-                      ? Colors.deepPurple
-                      : Colors.grey.shade200,
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      message.text,
-                      style: TextStyle(
-                        color: isUser ? Colors.white : Colors.black87,
-                        fontSize: 16,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      _formatTimestamp(message.timestamp),
-                      style: TextStyle(
-                        color: isUser
-                            ? Colors.white.withValues(alpha: 0.7)
-                            : Colors.black54,
-                        fontSize: 12,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
+    return Align(
+      alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
+      child: Container(
+        constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.78),
+        margin: const EdgeInsets.only(bottom: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 12),
+        decoration: BoxDecoration(
+          color: isUser ? AppColors.forest : AppColors.card,
+          borderRadius: BorderRadius.only(
+            topLeft: const Radius.circular(22),
+            topRight: const Radius.circular(22),
+            bottomLeft: Radius.circular(isUser ? 22 : 6),
+            bottomRight: Radius.circular(isUser ? 6 : 22),
           ),
-          if (isUser) ...[
-            const SizedBox(width: 8),
-            CircleAvatar(
-              backgroundColor: Colors.deepPurple.shade100,
-              radius: 16,
-              child: const Icon(Icons.person, size: 16),
-            ),
-          ],
-        ],
+        ),
+        child: Text(
+          message.text,
+          style: TextStyle(color: isUser ? AppColors.cream : AppColors.brown, fontSize: 15, height: 1.25),
+        ),
       ),
     );
   }
+}
 
-  String _formatTimestamp(DateTime timestamp) {
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-    final messageDate = DateTime(
-      timestamp.year,
-      timestamp.month,
-      timestamp.day,
+class _EmptyChat extends StatelessWidget {
+  const _EmptyChat();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Center(
+      child: Padding(
+        padding: EdgeInsets.all(24),
+        child: Text(
+          'Начни с быстрой фразы сверху или напиши своими словами.',
+          textAlign: TextAlign.center,
+          style: TextStyle(color: AppColors.brown, fontSize: 16),
+        ),
+      ),
     );
-
-    final time = '${timestamp.hour.toString().padLeft(2, '0')}:'
-        '${timestamp.minute.toString().padLeft(2, '0')}';
-
-    if (messageDate == today) {
-      return time;
-    } else if (messageDate == today.subtract(const Duration(days: 1))) {
-      return 'Вчера $time';
-    } else {
-      return '${timestamp.day}.${timestamp.month}.${timestamp.year} $time';
-    }
   }
 }
