@@ -22,6 +22,7 @@ class AppShell extends StatelessWidget {
     this.title,
     this.showAppBar = true,
     this.backgroundColor = AppColors.sage,
+    this.useMeadowBackground = true,
   });
 
   final String currentRoute;
@@ -29,11 +30,27 @@ class AppShell extends StatelessWidget {
   final String? title;
   final bool showAppBar;
   final Color backgroundColor;
+  final bool useMeadowBackground;
 
   @override
   Widget build(BuildContext context) {
+    final keyboardOpen = MediaQuery.of(context).viewInsets.bottom > 0;
+
     final content = Stack(
       children: [
+        if (useMeadowBackground) ...[
+          Positioned.fill(
+            child: Image.asset(
+              'assets/images/home_new/bg_meadow.png',
+              fit: BoxFit.cover,
+            ),
+          ),
+          Positioned.fill(
+            child: Container(
+              color: backgroundColor.withOpacity(0.34),
+            ),
+          ),
+        ],
         Positioned.fill(child: child),
         if (!showAppBar)
           Positioned(
@@ -55,6 +72,7 @@ class AppShell extends StatelessWidget {
     );
 
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       backgroundColor: backgroundColor,
       extendBody: true,
       appBar: showAppBar
@@ -78,7 +96,8 @@ class AppShell extends StatelessWidget {
             )
           : null,
       body: content,
-      bottomNavigationBar: _MainBottomNav(currentRoute: currentRoute),
+      bottomNavigationBar:
+          keyboardOpen ? null : _MainBottomNav(currentRoute: currentRoute),
     );
   }
 }
@@ -128,7 +147,9 @@ class _MainBottomNav extends StatelessWidget {
                   duration: const Duration(milliseconds: 180),
                   padding: const EdgeInsets.symmetric(vertical: 8),
                   decoration: BoxDecoration(
-                    color: selected ? AppColors.forest.withOpacity(0.14) : Colors.transparent,
+                    color: selected
+                        ? AppColors.forest.withOpacity(0.14)
+                        : Colors.transparent,
                     borderRadius: BorderRadius.circular(22),
                   ),
                   child: Column(
@@ -137,7 +158,9 @@ class _MainBottomNav extends StatelessWidget {
                       Icon(
                         item.icon,
                         size: 22,
-                        color: selected ? AppColors.forest : AppColors.brown.withOpacity(0.62),
+                        color: selected
+                            ? AppColors.forest
+                            : AppColors.brown.withOpacity(0.62),
                       ),
                       const SizedBox(height: 2),
                       Text(
@@ -146,8 +169,11 @@ class _MainBottomNav extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
                           fontSize: 10,
-                          fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
-                          color: selected ? AppColors.forest : AppColors.brown.withOpacity(0.68),
+                          fontWeight:
+                              selected ? FontWeight.w700 : FontWeight.w500,
+                          color: selected
+                              ? AppColors.forest
+                              : AppColors.brown.withOpacity(0.68),
                         ),
                       ),
                     ],

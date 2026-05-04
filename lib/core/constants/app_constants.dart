@@ -35,12 +35,18 @@ class AppConstants {
 
 class AppRoutes {
   static const String root = '/';
+  static const String onboarding = '/onboarding';
   static const String home = '/home';
   static const String chat = '/chat';
   static const String diary = '/diary';
   static const String tips = '/tips';
   static const String progress = '/progress';
   static const String help = '/help';
+  static const String helpSafety = '/help/safety';
+  static const String helpBreathing = '/help/breathing';
+  static const String helpGrounding = '/help/grounding';
+  static const String helpContact = '/help/contact';
+  static const String helpCrisis = '/help/crisis';
   static const String settings = '/settings';
 
   // Старый путь оставлен как алиас, чтобы старые переходы не ломались.

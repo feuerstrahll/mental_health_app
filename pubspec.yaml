@@ -115,4 +115,7 @@ flutter:
 # подключение картинки овечки на поле для diary_screen
   assets:
     - assets/images/sheep_diary_bg.jpg
+    - assets/images/ui/
+    - assets/images/ui/tips/
+    - assets/images/home_new/
     - assets/models/

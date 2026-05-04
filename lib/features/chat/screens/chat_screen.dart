@@ -52,29 +52,37 @@ class _ChatScreenState extends State<ChatScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final keyboardInset = MediaQuery.of(context).viewInsets.bottom;
+
     return AppShell(
       title: 'Поговорить',
       currentRoute: AppRoutes.chat,
       backgroundColor: const Color(0xFFFFEFD8),
+      useMeadowBackground: false,
       child: Consumer<ChatProvider>(
         builder: (context, chatProvider, _) {
           if (chatProvider.isLoading && !chatProvider.isInitialized) {
             return const Center(child: CircularProgressIndicator());
           }
 
-          return Container(
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [Color(0xFFFFE2BC), Color(0xFFFFF6E4)],
+          return Stack(
+            children: [
+              Positioned.fill(
+                child: Image.asset(
+                  'assets/images/ui/chat_room_bg.png',
+                  fit: BoxFit.cover,
+                ),
               ),
-            ),
-            child: SafeArea(
+              Positioned.fill(
+                child: Container(
+                  color: const Color(0xFFFFF1DE).withOpacity(0.58),
+                ),
+              ),
+              SafeArea(
               top: false,
               bottom: false,
-              child: Column(
-                children: [
+                child: Column(
+                  children: [
                   const _RoomHeader(),
                   _QuickPhrases(
                     phrases: _quickPhrases,
@@ -92,26 +100,42 @@ class _ChatScreenState extends State<ChatScreen> {
                             },
                           ),
                   ),
-                  if (chatProvider.isBotTyping)
-                    const Padding(
-                      padding: EdgeInsets.fromLTRB(18, 0, 18, 8),
-                      child: Row(
-                        children: [
-                          Icon(Icons.more_horiz_rounded, color: AppColors.brown),
-                          SizedBox(width: 8),
-                          Text('Печатает...', style: TextStyle(color: AppColors.brown, fontStyle: FontStyle.italic)),
-                        ],
-                      ),
+                  AnimatedPadding(
+                    duration: const Duration(milliseconds: 180),
+                    curve: Curves.easeOut,
+                    padding: EdgeInsets.only(bottom: keyboardInset > 0 ? keyboardInset + 8 : 96),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (chatProvider.isBotTyping)
+                          const Padding(
+                            padding: EdgeInsets.fromLTRB(18, 0, 18, 8),
+                            child: Row(
+                              children: [
+                                Icon(Icons.more_horiz_rounded, color: AppColors.brown),
+                                SizedBox(width: 8),
+                                Text(
+                                  'Печатает...',
+                                  style: TextStyle(
+                                    color: AppColors.brown,
+                                    fontStyle: FontStyle.italic,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        _MessageInput(
+                          controller: _messageController,
+                          enabled: !chatProvider.isBotTyping,
+                          onSend: () => _sendMessage(),
+                        ),
+                      ],
                     ),
-                  _MessageInput(
-                    controller: _messageController,
-                    enabled: !chatProvider.isBotTyping,
-                    onSend: () => _sendMessage(),
                   ),
-                  const SizedBox(height: 96),
                 ],
+                ),
               ),
-            ),
+            ],
           );
         },
       ),

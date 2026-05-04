@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 
 import '../../../core/constants/app_constants.dart';
 import '../../../providers/mood_provider.dart';
+import '../../../providers/settings_provider.dart';
 import '../../../widgets/app_shell.dart';
 
 class StatisticsScreen extends StatefulWidget {
@@ -14,15 +15,42 @@ class StatisticsScreen extends StatefulWidget {
 }
 
 class _StatisticsScreenState extends State<StatisticsScreen> {
-  int _periodDays = 7;
+  int? _periodDays = 7;
+  DateTimeRange? _customRange;
+
+  Future<void> _pickCustomRange() async {
+    final now = DateTime.now();
+    final picked = await showDateRangePicker(
+      context: context,
+      firstDate: DateTime(now.year - 2),
+      lastDate: DateTime(now.year + 1),
+      initialDateRange: _customRange ??
+          DateTimeRange(
+            start: now.subtract(const Duration(days: 6)),
+            end: now,
+          ),
+    );
+
+    if (picked == null || !mounted) return;
+    setState(() {
+      _customRange = picked;
+      _periodDays = null;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<MoodProvider>();
+    final settings = context.watch<SettingsProvider>();
     final now = DateTime.now();
-    final entries = provider.filterByDateRange(now.subtract(Duration(days: _periodDays)), now);
+    final start = _customRange?.start ?? now.subtract(Duration(days: _periodDays ?? 7));
+    final end = _customRange?.end ?? now;
+    final entries = provider.filterByDateRange(start, end);
     final avgStress = provider.averageStressFor(entries);
-    final observations = provider.generateObservations(lookbackDays: _periodDays);
+    final tipStats = _tipSummary(settings.tipFeedback);
+    final periodText = _customRange == null
+        ? '${_periodDays ?? 7} дней'
+        : '${_formatDate(start)} — ${_formatDate(end)}';
 
     return AppShell(
       title: 'Прогресс',
@@ -35,22 +63,31 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
           children: [
             Wrap(
               spacing: 8,
+              runSpacing: 8,
               children: [
                 for (final days in [7, 14, 30])
                   ChoiceChip(
                     label: Text('$days дней'),
                     selected: _periodDays == days,
                     selectedColor: AppColors.forest.withOpacity(0.22),
-                    onSelected: (_) => setState(() => _periodDays = days),
+                    labelStyle: const TextStyle(
+                      color: AppColors.brown,
+                      fontWeight: FontWeight.w700,
+                    ),
+                    onSelected: (_) => setState(() {
+                      _periodDays = days;
+                      _customRange = null;
+                    }),
                   ),
                 ChoiceChip(
                   label: const Text('свой период'),
-                  selected: false,
-                  onSelected: (_) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Выбор своего периода можно подключить позже')),
-                    );
-                  },
+                  selected: _periodDays == null,
+                  selectedColor: AppColors.forest.withOpacity(0.22),
+                  labelStyle: const TextStyle(
+                    color: AppColors.brown,
+                    fontWeight: FontWeight.w700,
+                  ),
+                  onSelected: (_) => _pickCustomRange(),
                 ),
               ],
             ),
@@ -64,9 +101,13 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                   Expanded(
                     child: Text(
                       entries.isEmpty
-                          ? 'За выбранный период пока нет записей. Заполни дневник, чтобы увидеть динамику.'
-                          : 'За $_periodDays дней записей: ${entries.length}. Средний стресс: ${avgStress?.toStringAsFixed(1) ?? '—'}/10.',
-                      style: const TextStyle(color: AppColors.brown, height: 1.3, fontWeight: FontWeight.w600),
+                          ? 'За период $periodText пока нет записей. Заполни дневник, чтобы увидеть динамику.'
+                          : 'Период: $periodText. Записей: ${entries.length}. Средний стресс: ${avgStress?.toStringAsFixed(1) ?? '—'}/10.',
+                      style: const TextStyle(
+                        color: AppColors.brown,
+                        height: 1.3,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
                 ],
@@ -113,16 +154,27 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('Какие советы чаще помогали', style: TextStyle(color: AppColors.brown, fontSize: 18, fontWeight: FontWeight.w900)),
+                  const Text(
+                    'Какие советы чаще помогали',
+                    style: TextStyle(
+                      color: AppColors.brown,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
                   const SizedBox(height: 8),
                   Text(
-                    observations.isEmpty
-                        ? 'После реакций на советы здесь появится персональный вывод.'
-                        : observations.join('\n'),
+                    tipStats,
                     style: const TextStyle(color: AppColors.brown, height: 1.35),
                   ),
                   const SizedBox(height: 8),
-                  const Text('Открыть советы →', style: TextStyle(color: AppColors.forest, fontWeight: FontWeight.w900)),
+                  const Text(
+                    'Открыть советы →',
+                    style: TextStyle(
+                      color: AppColors.forest,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -130,6 +182,40 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
         ),
       ),
     );
+  }
+
+  String _formatDate(DateTime date) {
+    return '${date.day.toString().padLeft(2, '0')}.${date.month.toString().padLeft(2, '0')}';
+  }
+
+  String _tipSummary(Map<String, String> feedback) {
+    if (feedback.isEmpty) {
+      return 'Пока нет реакций на советы. После свайпов здесь появится вывод: что помогало, что не подошло и какой тип практик лучше предлагать дальше.';
+    }
+
+    final helped = feedback.entries.where((e) => e.value == 'helped').toList();
+    final bad = feedback.entries.where((e) => e.value == 'bad').toList();
+    final later = feedback.entries.where((e) => e.value == 'later').toList();
+
+    final labels = {
+      'breath_46': 'дыхание',
+      'walk_light': 'свет и воздух',
+      'tiny_step': 'маленькие шаги',
+      'body_reset': 'телесные практики',
+    };
+
+    final helpedTitles = helped.map((e) => labels[e.key] ?? e.key).take(2).join(', ');
+    final lines = [
+      'Помогло: ${helped.length}. Не подошло: ${bad.length}. Отложено: ${later.length}.',
+    ];
+
+    if (helpedTitles.isNotEmpty) {
+      lines.add('Лучше всего сейчас заходят: $helpedTitles.');
+    } else if (bad.isNotEmpty) {
+      lines.add('Пока лучше сменить курс советов и предложить другие практики.');
+    }
+
+    return lines.join('\n');
   }
 
   List<double> _mockValues(int entriesCount, int seed) {
