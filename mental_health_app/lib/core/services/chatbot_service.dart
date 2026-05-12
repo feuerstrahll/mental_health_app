@@ -1,7 +1,9 @@
-import 'dart:convert';
+﻿import 'dart:convert';
 import 'dart:math';
 
 import 'package:http/http.dart' as http;
+
+import 'clinical_rules_service.dart';
 
 class ChatContext {
   const ChatContext({
@@ -16,7 +18,7 @@ class ChatContext {
 
   final int daysAnalyzed;
   final double averageStress;
-  final String riskLevel;
+  final RiskLevel riskLevel;
   final bool isCrisis;
   final List<String> triggeredRules;
   final String? predictedMood;
@@ -32,10 +34,10 @@ class ChatbotService {
     String? backendBaseUrl,
     bool? useBackendQwen,
     String? userId,
-  }) : _httpClient = httpClient ?? http.Client(),
-       _backendBaseUrl = backendBaseUrl ?? _defaultBackendBaseUrl,
-       _useBackendQwen = useBackendQwen ?? _defaultUseBackendQwen,
-       _userId = userId ?? _defaultUserId;
+  })  : _httpClient = httpClient ?? http.Client(),
+        _backendBaseUrl = backendBaseUrl ?? _defaultBackendBaseUrl,
+        _useBackendQwen = useBackendQwen ?? _defaultUseBackendQwen,
+        _userId = userId ?? _defaultUserId;
 
   final Random _random = Random();
   final http.Client _httpClient;
@@ -43,10 +45,8 @@ class ChatbotService {
   final bool _useBackendQwen;
   final String _userId;
 
-  static const bool _defaultUseBackendQwen = bool.fromEnvironment(
-    'MH_USE_BACKEND_QWEN',
-    defaultValue: true,
-  );
+  static const bool _defaultUseBackendQwen =
+      bool.fromEnvironment('MH_USE_BACKEND_QWEN', defaultValue: true);
   static const String _defaultBackendBaseUrl = String.fromEnvironment(
     'MH_BACKEND_URL',
     defaultValue: 'http://10.0.2.2:8000',
@@ -56,10 +56,7 @@ class ChatbotService {
     defaultValue: 'local_user',
   );
 
-  Future<String> generateResponse(
-    String userMessage, {
-    ChatContext? context,
-  }) async {
+  Future<String> generateResponse(String userMessage, {ChatContext? context}) async {
     final trimmed = userMessage.trim();
     if (trimmed.isEmpty) {
       return _withContext(_pick(_defaultResponses), context);
@@ -70,10 +67,7 @@ class ChatbotService {
     }
 
     if (_useBackendQwen) {
-      final llmResponse = await _tryGenerateBackendResponse(
-        trimmed,
-        context: context,
-      );
+      final llmResponse = await _tryGenerateBackendResponse(trimmed, context: context);
       if (llmResponse != null && llmResponse.isNotEmpty) {
         return llmResponse;
       }
@@ -104,9 +98,7 @@ class ChatbotService {
           .post(
             endpoint,
             headers: const <String, String>{'Content-Type': 'application/json'},
-            body: jsonEncode(
-              _buildSupportDecisionPayload(userMessage, context: context),
-            ),
+            body: jsonEncode(_buildSupportDecisionPayload(userMessage, context: context)),
           )
           .timeout(const Duration(seconds: 12));
 
@@ -152,7 +144,7 @@ class ChatbotService {
         'client_timestamp': DateTime.now().toUtc().toIso8601String(),
         'signals': <String, dynamic>{
           'emotion_marker': _deriveEmotionMarker(context),
-          'diary_note': null,
+          'diary_note': userMessage,
           'sleep_duration_hours': sleepDurationHours,
           'sleep_regularity': sleepRegularity,
           'sleep_quality': sleepQuality,
@@ -164,14 +156,8 @@ class ChatbotService {
         },
       },
       'latest_user_message': userMessage,
-      'latest_diary_note': null,
-      'dialogue_state': const <String, dynamic>{
-        'version': 1,
-        'turn_index': 0,
-        'last_bot_action': null,
-        'stop_requested': false,
-        'ui_state': 'followup_wait',
-      },
+      'latest_diary_note': userMessage,
+      'dialogue_state': const <String, dynamic>{'state': 'followup_wait'},
       'client_safety_precheck_result': <String, dynamic>{
         'safe_response_required': context?.isCrisis ?? false,
         'flags': context?.triggeredRules ?? const <String>[],
@@ -217,24 +203,11 @@ class ChatbotService {
       return _pick(_gratitudeResponses);
     }
 
-    if (_containsAny(message, <String>[
-      'stress',
-      'anxious',
-      'panic',
-      'тревог',
-      'стресс',
-    ])) {
+    if (_containsAny(message, <String>['stress', 'anxious', 'panic', 'тревог', 'стресс'])) {
       return _withContext(_pick(_stressResponses), context);
     }
 
-    if (_containsAny(message, <String>[
-      'sad',
-      'depress',
-      'tired',
-      'груст',
-      'плохо',
-      'устал',
-    ])) {
+    if (_containsAny(message, <String>['sad', 'depress', 'tired', 'груст', 'плохо', 'устал'])) {
       return _withContext(_pick(_supportiveResponses), context);
     }
 
@@ -246,13 +219,7 @@ class ChatbotService {
       return _withContext(_pick(_helpResponses), context);
     }
 
-    if (_containsAny(message, <String>[
-      'good',
-      'great',
-      'happy',
-      'рад',
-      'хорошо',
-    ])) {
+    if (_containsAny(message, <String>['good', 'great', 'happy', 'рад', 'хорошо'])) {
       return _pick(_positiveResponses);
     }
 
@@ -281,20 +248,16 @@ class ChatbotService {
     return '$base\n\n$riskHint$moodHint$emotionHint';
   }
 
-  String _riskToHint(String level) {
-    switch (level.toLowerCase()) {
-      case 'low':
-      case 'normal':
+  String _riskToHint(RiskLevel level) {
+    switch (level) {
+      case RiskLevel.low:
         return 'Current diary risk: low.';
-      case 'moderate':
-      case 'elevated':
+      case RiskLevel.moderate:
         return 'Current diary risk: moderate. Keep sleep and rest stable if possible.';
-      case 'high':
+      case RiskLevel.high:
         return 'Current diary risk: high. Consider reducing load and talking to someone you trust.';
-      case 'crisis':
+      case RiskLevel.crisis:
         return 'Current diary risk: crisis.';
-      default:
-        return 'Current diary risk: low.';
     }
   }
 

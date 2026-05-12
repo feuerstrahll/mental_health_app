@@ -28,11 +28,9 @@ class MoodEntry {
     required this.stressLevel,
     required this.timestamp,
     this.note,
-  }) : assert(
-         stressLevel >= AppConstants.minStressLevel &&
-             stressLevel <= AppConstants.maxStressLevel,
-         'Stress level must be between ${AppConstants.minStressLevel} and ${AppConstants.maxStressLevel}',
-       );
+  }) : assert(stressLevel >= AppConstants.minStressLevel &&
+            stressLevel <= AppConstants.maxStressLevel,
+            'Stress level must be between ${AppConstants.minStressLevel} and ${AppConstants.maxStressLevel}');
 
   final String id;
   final String emotion;
@@ -89,18 +87,12 @@ abstract class MoodRepository {
 }
 
 class MoodProvider extends ChangeNotifier {
-  MoodProvider({required MoodRepository repository}) : _repository = repository;
-
-  static const String diaryOnboardingInsight =
-      'Заполняй свои данные каждый день и следи за прогрессом, а я помогу тебе замечать изменения в привычках.';
-  static const String diaryNeedsMoreDataInsight =
-      'Нужно ещё немного данных. После нескольких записей здесь появятся наблюдения за твоими привычками.';
+  MoodProvider({required MoodRepository repository})
+      : _repository = repository;
 
   final MoodRepository _repository;
   final List<MoodEntry> _entries = <MoodEntry>[];
   MLService? _mlService;
-  String? _cachedDiaryInsight;
-  String? _cachedDiaryInsightSignature;
 
   bool _isLoading = false;
   bool _hasError = false;
@@ -123,7 +115,6 @@ class MoodProvider extends ChangeNotifier {
         ..clear()
         ..addAll(fetched);
       _entries.sort((a, b) => b.timestamp.compareTo(a.timestamp));
-      refreshDiaryInsight(notify: false);
     } catch (error, stackTrace) {
       _handleError('Failed to load mood entries', error, stackTrace);
     } finally {
@@ -150,7 +141,6 @@ class MoodProvider extends ChangeNotifier {
       await _repository.upsertEntry(entry);
       _entries.add(entry);
       _entries.sort((a, b) => b.timestamp.compareTo(a.timestamp));
-      refreshDiaryInsight(notify: false);
       notifyListeners();
       return entry;
     } catch (error, stackTrace) {
@@ -170,7 +160,6 @@ class MoodProvider extends ChangeNotifier {
       await _repository.upsertEntry(updated);
       _entries[index] = updated;
       _entries.sort((a, b) => b.timestamp.compareTo(a.timestamp));
-      refreshDiaryInsight(notify: false);
       notifyListeners();
     } catch (error, stackTrace) {
       _handleError('Failed to update mood entry', error, stackTrace);
@@ -188,7 +177,6 @@ class MoodProvider extends ChangeNotifier {
     try {
       await _repository.deleteEntry(id);
       _entries.removeAt(index);
-      refreshDiaryInsight(notify: false);
       notifyListeners();
     } catch (error, stackTrace) {
       _handleError('Failed to delete mood entry', error, stackTrace);
@@ -201,7 +189,6 @@ class MoodProvider extends ChangeNotifier {
     try {
       await _repository.clearAll();
       _entries.clear();
-      refreshDiaryInsight(notify: false);
       notifyListeners();
     } catch (error, stackTrace) {
       _handleError('Failed to clear diary', error, stackTrace);
@@ -214,15 +201,9 @@ class MoodProvider extends ChangeNotifier {
     final normalizedStart = DateTime(start.year, start.month, start.day);
     final normalizedEnd = DateTime(end.year, end.month, end.day, 23, 59, 59);
     return _entries
-        .where(
-          (entry) =>
-              entry.timestamp.isAfter(
-                normalizedStart.subtract(const Duration(seconds: 1)),
-              ) &&
-              entry.timestamp.isBefore(
-                normalizedEnd.add(const Duration(seconds: 1)),
-              ),
-        )
+        .where((entry) =>
+            entry.timestamp.isAfter(normalizedStart.subtract(const Duration(seconds: 1))) &&
+            entry.timestamp.isBefore(normalizedEnd.add(const Duration(seconds: 1))))
         .toList();
   }
 
@@ -239,10 +220,7 @@ class MoodProvider extends ChangeNotifier {
     final minValue = minLevel ?? AppConstants.minStressLevel;
     final maxValue = maxLevel ?? AppConstants.maxStressLevel;
     return _entries
-        .where(
-          (entry) =>
-              entry.stressLevel >= minValue && entry.stressLevel <= maxValue,
-        )
+        .where((entry) => entry.stressLevel >= minValue && entry.stressLevel <= maxValue)
         .toList();
   }
 
@@ -252,10 +230,7 @@ class MoodProvider extends ChangeNotifier {
   /// Returns the average stress level across all entries.
   double? get averageStressLevel {
     if (_entries.isEmpty) return null;
-    final total = _entries.fold<int>(
-      0,
-      (sum, entry) => sum + entry.stressLevel,
-    );
+    final total = _entries.fold<int>(0, (sum, entry) => sum + entry.stressLevel);
     return total / _entries.length;
   }
 
@@ -286,61 +261,22 @@ class MoodProvider extends ChangeNotifier {
     if (_entries.isEmpty) return const <String>[];
 
     final now = DateTime.now();
-    final recentEntries = filterByDateRange(
-      now.subtract(Duration(days: lookbackDays)),
-      now,
-    );
+    final recentEntries = filterByDateRange(now.subtract(Duration(days: lookbackDays)), now);
     if (recentEntries.isEmpty) return const <String>[];
 
     final observations = <String>[];
     final average = averageStressFor(recentEntries);
     if (average != null) {
-      observations.add(
-        'Average stress over the last $lookbackDays days: ${average.toStringAsFixed(1)}',
-      );
+      observations.add('Average stress over the last $lookbackDays days: ${average.toStringAsFixed(1)}');
     }
 
     final distribution = _emotionDistributionFor(recentEntries);
     if (distribution.isNotEmpty) {
-      final topEmotion = distribution.entries.reduce(
-        (a, b) => a.value >= b.value ? a : b,
-      );
-      observations.add(
-        'Most common emotion: ${topEmotion.key} (${topEmotion.value.toStringAsFixed(1)}%)',
-      );
+      final topEmotion = distribution.entries.reduce((a, b) => a.value >= b.value ? a : b);
+      observations.add('Most common emotion: ${topEmotion.key} (${topEmotion.value.toStringAsFixed(1)}%)');
     }
 
     return observations;
-  }
-
-  /// Returns a short cached local diary insight for the Diary page.
-  ///
-  /// This method is intentionally deterministic and local-only. A future LLM
-  /// implementation should update this cache after a saved entry or manual
-  /// refresh, never from a widget build.
-  String getDiaryInsight({int lookbackDays = 7}) {
-    if (_entries.isEmpty) return diaryOnboardingInsight;
-    if (_entries.length < 3) return diaryNeedsMoreDataInsight;
-
-    final signature = _diaryInsightSignature(lookbackDays: lookbackDays);
-    if (_cachedDiaryInsight != null &&
-        _cachedDiaryInsightSignature == signature) {
-      return _cachedDiaryInsight!;
-    }
-
-    _cachedDiaryInsight = _buildLocalDiaryInsight(lookbackDays: lookbackDays);
-    _cachedDiaryInsightSignature = signature;
-    return _cachedDiaryInsight!;
-  }
-
-  void refreshDiaryInsight({int lookbackDays = 7, bool notify = true}) {
-    _cachedDiaryInsight = _entries.length < 3
-        ? null
-        : _buildLocalDiaryInsight(lookbackDays: lookbackDays);
-    _cachedDiaryInsightSignature = _entries.length < 3
-        ? null
-        : _diaryInsightSignature(lookbackDays: lookbackDays);
-    if (notify) notifyListeners();
   }
 
   /// Exports all mood entries into a JSON file for external ML training.
@@ -369,7 +305,7 @@ class MoodProvider extends ChangeNotifier {
     if (_entries.length < 3) {
       return {};
     }
-
+    
     // Lazy load ML service
     try {
       final mlService = await _getMLService();
@@ -385,13 +321,12 @@ class MoodProvider extends ChangeNotifier {
   /// Получение рекомендованной категории советов
   String getRecommendedTipCategory() {
     if (_entries.isEmpty) return 'general';
-
+    
     try {
       // Используем синхронный анализ для быстрого ответа
       final recent = _entries.take(7).toList();
-      final avgStress =
-          recent.fold<int>(0, (sum, e) => sum + e.stressLevel) / recent.length;
-
+      final avgStress = recent.fold<int>(0, (sum, e) => sum + e.stressLevel) / recent.length;
+      
       if (avgStress > 7) return 'stress_management';
       if (avgStress > 5) return 'relaxation';
       if (avgStress < 3) return 'positive_habits';
@@ -453,70 +388,5 @@ class MoodProvider extends ChangeNotifier {
       final percentage = (count / entries.length) * 100;
       return MapEntry(emotion, percentage);
     });
-  }
-
-  String _buildLocalDiaryInsight({required int lookbackDays}) {
-    final now = DateTime.now();
-    final recentEntries = filterByDateRange(
-      now.subtract(Duration(days: lookbackDays)),
-      now,
-    );
-    final sourceEntries = recentEntries.length >= 3
-        ? recentEntries
-        : _entries.take(lookbackDays).toList();
-    final averageStress = averageStressFor(sourceEntries);
-    final distribution = _emotionDistributionFor(sourceEntries);
-
-    final parts = <String>[];
-    if (distribution.isNotEmpty) {
-      final topEmotion = distribution.entries.reduce(
-        (a, b) => a.value >= b.value ? a : b,
-      );
-      parts.add('чаще отмечалось состояние «${_emotionLabel(topEmotion.key)}»');
-    }
-    if (averageStress != null) {
-      if (averageStress >= 7) {
-        parts.add('уровень напряжения был повышенным');
-      } else if (averageStress <= 3) {
-        parts.add('уровень напряжения оставался низким');
-      } else {
-        parts.add('уровень напряжения был умеренным');
-      }
-    }
-
-    final observation = parts.isEmpty
-        ? 'За последние $lookbackDays дней уже появились первые данные для наблюдения.'
-        : 'За последние $lookbackDays дней ${parts.join(', ')}.';
-    return '$observation Продолжай заполнять дневник, чтобы точнее замечать изменения в привычках.';
-  }
-
-  String _diaryInsightSignature({required int lookbackDays}) {
-    final ids = _entries
-        .take(lookbackDays)
-        .map(
-          (entry) =>
-              '${entry.id}:${entry.timestamp.toIso8601String()}:${entry.emotion}:${entry.stressLevel}:${entry.note ?? ''}',
-        )
-        .join('|');
-    return '$lookbackDays:$ids';
-  }
-
-  String _emotionLabel(String emotion) {
-    switch (emotion.toLowerCase()) {
-      case 'happy':
-        return 'хорошо';
-      case 'sad':
-        return 'грустно';
-      case 'anxious':
-        return 'тревожно';
-      case 'calm':
-        return 'спокойно';
-      case 'angry':
-        return 'злость';
-      case 'neutral':
-        return 'нейтрально';
-      default:
-        return emotion;
-    }
   }
 }

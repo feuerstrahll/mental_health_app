@@ -4,22 +4,14 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 
-/// Сервис для хранения настроек приложения и экспорта данных
-/// 
-/// Использует JSON файлы для простых настроек.
-/// Критичные данные (mood entries, chat messages) хранятся в зашифрованной БД.
 class StorageService {
   StorageService();
 
   static const String _settingsFileName = 'settings.json';
 
-  // ============ Settings ============
-
-  /// Загружает настройки приложения
   Future<Map<String, dynamic>> loadSettings() async {
     try {
       final file = await _getSettingsFile();
-      
       if (!await file.exists()) {
         return _getDefaultSettings();
       }
@@ -39,7 +31,6 @@ class StorageService {
     }
   }
 
-  /// Сохраняет настройки приложения
   Future<void> saveSettings(Map<String, dynamic> settings) async {
     try {
       final file = await _getSettingsFile();
@@ -54,7 +45,6 @@ class StorageService {
     }
   }
 
-  /// Очищает настройки приложения
   Future<void> clearSettings() async {
     try {
       final settingsFile = await _getSettingsFile();
@@ -70,8 +60,6 @@ class StorageService {
     }
   }
 
-  // ============ Private Helpers ============
-
   Future<File> _getSettingsFile() async {
     final directory = await getApplicationDocumentsDirectory();
     return File('${directory.path}/$_settingsFileName');
@@ -79,11 +67,13 @@ class StorageService {
 
   Map<String, dynamic> _getDefaultSettings() {
     return {
-      'theme': 'light',
-      'notifications_enabled': true,
-      'chat_history_enabled': true,
-      'auto_save_diary': true,
-      'language': 'ru',
+      'theme': 'dynamic',
+      'daily_reminder': true,
+      'tips_reminder': false,
+      'onboarding_complete': false,
+      'profile': <String, dynamic>{},
+      'tip_feedback': <String, dynamic>{},
+      'starter_quiz': <String, dynamic>{},
     };
   }
 }
