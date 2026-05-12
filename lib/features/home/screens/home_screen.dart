@@ -48,6 +48,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   @override
   void didChangeMetrics() {
     super.didChangeMetrics();
+
     final view = WidgetsBinding.instance.platformDispatcher.views.first;
     final keyboardBottom = view.viewInsets.bottom / view.devicePixelRatio;
 
@@ -70,6 +71,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   void _handleCommentFocusChange() {
     if (!mounted) return;
     if (_waitingForKeyboardOpen) return;
+
     if (!_commentFocusNode.hasFocus && _showKeyboardDock) {
       setState(() => _showKeyboardDock = false);
     }
@@ -103,10 +105,12 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
   Future<void> _loadSupportText() async {
     if (!mounted) return;
+
     setState(() => _supportLoading = true);
 
     final settings = context.read<SettingsProvider>();
     final moodProvider = context.read<MoodProvider>();
+
     final latestEntry = moodProvider.entries.isEmpty
         ? null
         : moodProvider.entries.first;
@@ -117,6 +121,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     );
 
     if (!mounted) return;
+
     setState(() {
       _supportText = text;
       _supportLoading = false;
@@ -125,9 +130,15 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
   Future<void> _saveMood() async {
     if (_selectedMoodIndex == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Выбери настроение')),
-      );
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(
+          const SnackBar(
+            content: Text('Выбери настроение'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+
       return;
     }
 
@@ -135,10 +146,10 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     final note = _commentController.text.trim();
 
     await context.read<MoodProvider>().addEntry(
-      emotion: mood.emotionKey,
-      stressLevel: mood.stressLevel,
-      note: note.isEmpty ? null : note,
-    );
+          emotion: mood.emotionKey,
+          stressLevel: mood.stressLevel,
+          note: note.isEmpty ? null : note,
+        );
 
     if (!mounted) return;
 
@@ -154,9 +165,24 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     await _loadSupportText();
 
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('День сохранён')),
+
+    final messenger = ScaffoldMessenger.of(context);
+
+    messenger.hideCurrentSnackBar();
+
+    messenger.showSnackBar(
+      const SnackBar(
+        content: Text('День сохранён'),
+        duration: Duration(seconds: 2),
+        behavior: SnackBarBehavior.floating,
+      ),
     );
+
+    Future.delayed(const Duration(seconds: 2), () {
+      if (messenger.mounted) {
+        messenger.hideCurrentSnackBar();
+      }
+    });
   }
 
   void _go(String route) => context.go(route);
@@ -180,6 +206,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               fit: BoxFit.cover,
             ),
           ),
+
           Positioned(
             left: 0,
             right: 0,
@@ -189,6 +216,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               color: const Color(0xFF2F8C3A),
             ),
           ),
+
           Positioned(
             left: 16,
             right: 16,
@@ -205,6 +233,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               ),
             ),
           ),
+
           Positioned(
             left: 8,
             right: 8,
@@ -215,6 +244,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               onRefresh: _loadSupportText,
             ),
           ),
+
           Positioned(
             left: 8,
             top: topInset + 188,
@@ -225,6 +255,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               onTap: () => _go(AppRoutes.settings),
             ),
           ),
+
           Positioned(
             left: 8,
             top: topInset + 306,
@@ -235,6 +266,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               onTap: () => _go(AppRoutes.progress),
             ),
           ),
+
           Positioned(
             right: 8,
             top: topInset + 188,
@@ -245,13 +277,15 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               onTap: () => _go(AppRoutes.help),
             ),
           ),
+
           Positioned(
-            left: 112,
-            right: 112,
-            top: topInset + 316,
-            height: 80,
+            left: 88,
+            right: 88,
+            top: topInset + 270,
+            height: 105,
             child: _RunningSheep(onTap: () {}),
           ),
+
           Positioned(
             left: 6,
             right: 6,
@@ -264,6 +298,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               },
             ),
           ),
+
           Positioned(
             left: 24,
             right: 24,
@@ -274,6 +309,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               onSave: _saveMood,
             ),
           ),
+
           if (!showKeyboardDock)
             const Positioned(
               left: 24,
@@ -292,6 +328,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                 ),
               ),
             ),
+
           Positioned(
             left: 0,
             bottom: 0,
@@ -302,6 +339,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               onTap: () => _go(AppRoutes.diary),
             ),
           ),
+
           Positioned(
             right: 0,
             bottom: 0,
@@ -312,6 +350,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               onTap: () => _go(AppRoutes.chat),
             ),
           ),
+
           Positioned(
             left: 0,
             right: 0,
@@ -325,6 +364,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               ),
             ),
           ),
+
           if (showKeyboardDock)
             Positioned(
               left: 12,
@@ -368,6 +408,7 @@ class _CloudTipCard extends StatelessWidget {
                 fit: BoxFit.fill,
               ),
             ),
+
             Positioned(
               left: 72,
               right: 72,
@@ -449,8 +490,10 @@ class _MoodQuestionArc extends StatelessWidget {
           final width = constraints.maxWidth;
           final radius = min(width / 2 - 26, 168.0);
           final center = Offset(width / 2, 174);
+
           const start = 3.58;
           const end = 5.84;
+
           final step = (end - start) / (moods.length - 1);
 
           return Stack(
@@ -460,6 +503,7 @@ class _MoodQuestionArc extends StatelessWidget {
                 size: Size(width, 186),
                 painter: _ArcPainter(radius: radius),
               ),
+
               const Positioned(
                 left: 74,
                 right: 74,
@@ -480,6 +524,7 @@ class _MoodQuestionArc extends StatelessWidget {
                   ),
                 ),
               ),
+
               for (int i = 0; i < moods.length; i++)
                 Positioned(
                   left: center.dx + cos(start + step * i) * radius - 35,
@@ -533,9 +578,10 @@ class _ArcPainter extends CustomPainter {
       ..style = PaintingStyle.stroke;
 
     final rect = Rect.fromCircle(
-      center: Offset(size.width / 2, 172),
+      center: Offset(size.width / 2, 174),
       radius: radius,
     );
+
     canvas.drawArc(rect, 3.58, 2.26, false, paint);
   }
 
@@ -565,7 +611,10 @@ class _CommentLauncher extends StatelessWidget {
         decoration: BoxDecoration(
           color: const Color(0x22000000),
           borderRadius: BorderRadius.circular(22),
-          border: Border.all(color: const Color(0xFFF7E9BC), width: 2),
+          border: Border.all(
+            color: const Color(0xFFF7E9BC),
+            width: 2,
+          ),
         ),
         child: Row(
           children: [
@@ -576,6 +625,7 @@ class _CommentLauncher extends StatelessWidget {
                   valueListenable: controller,
                   builder: (context, value, _) {
                     final text = value.text.trim();
+
                     return Text(
                       text.isEmpty ? 'Хочешь добавить пару слов?' : text,
                       maxLines: 2,
@@ -591,6 +641,7 @@ class _CommentLauncher extends StatelessWidget {
                 ),
               ),
             ),
+
             IconButton(
               onPressed: onSave,
               icon: const Icon(
@@ -599,6 +650,7 @@ class _CommentLauncher extends StatelessWidget {
                 size: 30,
               ),
             ),
+
             const SizedBox(width: 4),
           ],
         ),
@@ -658,6 +710,7 @@ class _KeyboardInputDock extends StatelessWidget {
                 ),
               ),
             ),
+
             IconButton(
               onPressed: onSave,
               icon: const Icon(
@@ -686,38 +739,224 @@ class _RunningSheepState extends State<_RunningSheep>
     with TickerProviderStateMixin {
   late final AnimationController _moveController;
   late final AnimationController _heartController;
-  Timer? _hideHeartsTimer;
-  bool _showHearts = false;
+  late final AnimationController _tapController;
 
+  final Random _random = Random();
+
+  Timer? _hideHeartsTimer;
+  Timer? _resetTapTimer;
+
+  Duration? _lastTickTime;
+
+  Size _areaSize = Size.zero;
+  Offset _position = const Offset(40, 42);
+  Offset _velocity = Offset.zero;
+
+  bool _showHearts = false;
+  int _tapAction = 0;
+
+  static const double _sheepSize = 62;
+  static const double _speed = 18;
+  static const double _slowdownDistance = 22;
+  
   @override
   void initState() {
     super.initState();
+
     _moveController = AnimationController(
       vsync: this,
-      duration: const Duration(seconds: 14),
-    )..repeat(reverse: true);
+      duration: const Duration(days: 1),
+    )
+      ..addListener(_updatePosition)
+      ..repeat();
+
     _heartController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 900),
     );
+
+    _tapController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 780),
+    );
+
+    _chooseRandomVelocity();
   }
 
   @override
   void dispose() {
     _moveController.dispose();
     _heartController.dispose();
+    _tapController.dispose();
     _hideHeartsTimer?.cancel();
+    _resetTapTimer?.cancel();
     super.dispose();
+  }
+
+  void _updatePosition() {
+    if (_areaSize == Size.zero) return;
+
+    final currentTime = _moveController.lastElapsedDuration;
+    if (currentTime == null) return;
+
+    if (_lastTickTime == null) {
+      _lastTickTime = currentTime;
+      return;
+    }
+
+    final dt = (currentTime - _lastTickTime!).inMilliseconds / 1000.0;
+    _lastTickTime = currentTime;
+
+    if (dt <= 0 || dt > 0.1) return;
+
+    final maxX = max(0.0, _areaSize.width - _sheepSize);
+    final maxY = max(0.0, _areaSize.height - _sheepSize);
+
+    final distanceToLeft = _position.dx;
+    final distanceToRight = maxX - _position.dx;
+    final distanceToTop = _position.dy;
+    final distanceToBottom = maxY - _position.dy;
+
+    final nearestEdge = min(
+      min(distanceToLeft, distanceToRight),
+      min(distanceToTop, distanceToBottom),
+    );
+
+    final slowPart = (nearestEdge / _slowdownDistance).clamp(0.0, 1.0);
+    final speedFactor = 0.65 + 0.35 * slowPart;
+
+    var next = _position + _velocity * dt * speedFactor;
+
+    var hitLeft = false;
+    var hitRight = false;
+    var hitTop = false;
+    var hitBottom = false;
+
+    if (next.dx <= 0) {
+      next = Offset(0, next.dy);
+      hitLeft = true;
+    }
+
+    if (next.dx >= maxX) {
+      next = Offset(maxX, next.dy);
+      hitRight = true;
+    }
+
+    if (next.dy <= 0) {
+      next = Offset(next.dx, 0);
+      hitTop = true;
+    }
+
+    if (next.dy >= maxY) {
+      next = Offset(next.dx, maxY);
+      hitBottom = true;
+    }
+
+    if (hitLeft || hitRight || hitTop || hitBottom) {
+      _chooseRandomVelocityFromBorder(
+        hitLeft: hitLeft,
+        hitRight: hitRight,
+        hitTop: hitTop,
+        hitBottom: hitBottom,
+      );
+    }
+
+    if (mounted) {
+      setState(() {
+        _position = next;
+      });
+    }
+  }
+
+  void _chooseRandomVelocity() {
+    for (int i = 0; i < 40; i++) {
+      final angle = _random.nextDouble() * 2 * pi;
+
+      final candidate = Offset(
+        cos(angle) * _speed,
+        sin(angle) * _speed,
+      );
+
+      if (candidate.dx.abs() < 10) continue;
+      if (candidate.dy.abs() < 8) continue;
+
+      _velocity = candidate;
+      return;
+    }
+
+    _velocity = const Offset(_speed, _speed * 0.6);
+  }
+
+  void _chooseRandomVelocityFromBorder({
+    required bool hitLeft,
+    required bool hitRight,
+    required bool hitTop,
+    required bool hitBottom,
+  }) {
+    for (int i = 0; i < 60; i++) {
+      final angle = _random.nextDouble() * 2 * pi;
+
+      final candidate = Offset(
+        cos(angle) * _speed,
+        sin(angle) * _speed,
+      );
+
+      if (candidate.dx.abs() < 10) continue;
+      if (candidate.dy.abs() < 8) continue;
+
+      if (hitLeft && candidate.dx <= 0) continue;
+      if (hitRight && candidate.dx >= 0) continue;
+      if (hitTop && candidate.dy <= 0) continue;
+      if (hitBottom && candidate.dy >= 0) continue;
+
+      _velocity = candidate;
+      return;
+    }
+
+    _velocity = Offset(
+      hitLeft
+          ? _speed
+          : hitRight
+              ? -_speed
+              : _velocity.dx,
+      hitTop
+          ? _speed
+          : hitBottom
+              ? -_speed
+              : _velocity.dy,
+    );
   }
 
   void _handleTap() {
     widget.onTap();
-    setState(() => _showHearts = true);
-    _heartController.forward(from: 0);
+
+    final nextAction = _random.nextInt(3);
+
     _hideHeartsTimer?.cancel();
-    _hideHeartsTimer = Timer(const Duration(milliseconds: 1500), () {
+    _resetTapTimer?.cancel();
+
+    setState(() {
+      _tapAction = nextAction;
+      _showHearts = nextAction == 0;
+    });
+
+    _tapController.forward(from: 0);
+
+    if (nextAction == 0) {
+      _heartController.forward(from: 0);
+
+      _hideHeartsTimer = Timer(const Duration(milliseconds: 1500), () {
+        if (mounted) {
+          setState(() => _showHearts = false);
+        }
+      });
+    }
+
+    _resetTapTimer = Timer(const Duration(milliseconds: 860), () {
       if (mounted) {
-        setState(() => _showHearts = false);
+        setState(() {
+          _tapAction = 0;
+        });
       }
     });
   }
@@ -726,35 +965,75 @@ class _RunningSheepState extends State<_RunningSheep>
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final maxX = max(0.0, constraints.maxWidth - 62 - 24);
+        final newAreaSize = Size(
+          constraints.maxWidth,
+          constraints.maxHeight,
+        );
+
+        if (_areaSize != newAreaSize) {
+          _areaSize = newAreaSize;
+
+          final maxX = max(0.0, _areaSize.width - _sheepSize);
+          final maxY = max(0.0, _areaSize.height - _sheepSize);
+
+          _position = Offset(
+            _position.dx.clamp(0.0, maxX),
+            _position.dy.clamp(0.0, maxY),
+          );
+        }
 
         return AnimatedBuilder(
-          animation: Listenable.merge([_moveController, _heartController]),
+          animation: Listenable.merge([
+            _heartController,
+            _tapController,
+          ]),
           builder: (context, child) {
-            final progress = Curves.easeInOut.transform(_moveController.value);
-            final x = 12 + maxX * progress;
             final heartRise = 14 * _heartController.value;
-            final sway = sin(_moveController.value * 2 * pi) * 0.12;
-            final nearTurn =
-                _moveController.value < 0.08 || _moveController.value > 0.92;
-            final stepMirror = nearTurn
-                ? 1.0
-                : (((_moveController.value * 20).floor() % 2 == 0)
-                    ? 1.0
-                    : -1.0);
+
+            final tapProgress = Curves.easeInOut.transform(
+              _tapController.value,
+            );
+
+            final jumpOffset = _tapAction == 1
+                ? -20 * sin(pi * tapProgress)
+                : 0.0;
+
+            final rollOffset = _tapAction == 2
+                ? -10 * sin(pi * tapProgress)
+                : 0.0;
+
+            final rollAngle = _tapAction == 2
+                ? 2 * pi * tapProgress
+                : 0.0;
+
+            final squeeze = _tapAction == 1
+                ? 1.0 + 0.08 * sin(pi * tapProgress)
+                : 1.0;
+
+            final sway =
+                sin(DateTime.now().millisecondsSinceEpoch / 260) * 0.08;
+
+            final directionMirror = _velocity.dx < 0 ? -1.0 : 1.0;
+
+            final walkStepMirror =
+                (DateTime.now().millisecondsSinceEpoch ~/ 550).isEven ? 1.0 : -1.0;
+
+            final stepMirror = directionMirror * walkStepMirror;
+            
+            
 
             return Stack(
               clipBehavior: Clip.none,
               children: [
                 Positioned(
-                  left: x,
-                  top: 8 + sin(_moveController.value * 2 * pi) * 1.5,
+                  left: _position.dx,
+                  top: _position.dy + jumpOffset + rollOffset,
                   child: GestureDetector(
                     behavior: HitTestBehavior.opaque,
                     onTap: _handleTap,
                     child: SizedBox(
-                      width: 62,
-                      height: 62,
+                      width: _sheepSize,
+                      height: _sheepSize,
                       child: Stack(
                         clipBehavior: Clip.none,
                         children: [
@@ -774,12 +1053,13 @@ class _RunningSheepState extends State<_RunningSheep>
                                 ),
                               ),
                             ),
+
                           Transform.rotate(
-                            angle: sway,
+                            angle: sway + rollAngle,
                             child: Transform(
                               alignment: Alignment.center,
                               transform: Matrix4.identity()
-                                ..scale(stepMirror, 1.0),
+                                ..scale(stepMirror, squeeze),
                               child: Image.asset(
                                 'assets/images/ui/sheep.png',
                                 fit: BoxFit.contain,
