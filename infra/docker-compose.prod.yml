@@ -1,0 +1,52 @@
+name: ${COMPOSE_PROJECT_NAME:-mental-health}
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    env_file:
+      - ${POSTGRES_ENV_FILE:?set POSTGRES_ENV_FILE}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    expose:
+      - "5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER:-postgres} -d $${POSTGRES_DB:-mental_health}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  qwen:
+    image: ${QWEN_IMAGE:?set QWEN_IMAGE}
+    restart: unless-stopped
+    env_file:
+      - ${QWEN_ENV_FILE:?set QWEN_ENV_FILE}
+    volumes:
+      - qwen_session:/app/session
+    expose:
+      - "3264"
+
+  bge-gateway:
+    image: ${BGE_IMAGE:?set BGE_IMAGE}
+    restart: unless-stopped
+    expose:
+      - "8001"
+
+  backend:
+    image: ${BACKEND_IMAGE:?set BACKEND_IMAGE}
+    restart: unless-stopped
+    env_file:
+      - ${BACKEND_ENV_FILE:?set BACKEND_ENV_FILE}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      qwen:
+        condition: service_started
+      bge-gateway:
+        condition: service_started
+    ports:
+      - "${BACKEND_CONTAINER_PORT:-8000}:8000"
+
+volumes:
+  postgres_data:
+  qwen_session:

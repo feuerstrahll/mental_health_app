@@ -1,0 +1,128 @@
+# Unified Model Configuration
+# This file is the single source of truth for all model hyperparameters
+# Used by: train_model.py, ml_service.dart, and clinical_rules.py
+
+model:
+  # Input tensor shape: (batch_size, lookback_days, num_features)
+  lookback_days: 14      # Historical data window size
+  num_features: 4        # Features: [emotion_val, stress_val, hour_of_day, day_of_week]
+  num_classes: 6         # Emotion classes: Happy, Sad, Anxious, Calm, Angry, Neutral
+  
+  # Model architecture parameters
+  lstm_units_layer1: 64
+  lstm_units_layer2: 32
+  dropout_rate: 0.3
+  dense_units: 32
+  learning_rate: 0.001
+  
+  # Training parameters
+  epochs: 100
+  batch_size: 32
+  validation_split: 0.2
+  early_stopping_patience: 15
+  reduce_lr_patience: 5
+  
+emotions:
+  # Must match AppConstants.emotions in app_constants.dart
+  map:
+    Happy: 0
+    Sad: 1
+    Anxious: 2
+    Calm: 3
+    Angry: 4
+    Neutral: 5
+  
+  # Critical emotions where false negatives are dangerous
+  critical:
+    - Anxious
+    - Sad
+  
+  # Emotion value ranges for feature encoding [0, 1]
+  encoding:
+    Happy:
+      emotion_range: [0.7, 1.0]
+      stress_range: [0.1, 0.4]
+    Sad:
+      emotion_range: [0.0, 0.3]
+      stress_range: [0.6, 1.0]
+    Anxious:
+      emotion_range: [0.2, 0.5]
+      stress_range: [0.7, 1.0]
+    Calm:
+      emotion_range: [0.5, 0.8]
+      stress_range: [0.1, 0.3]
+    Angry:
+      emotion_range: [0.0, 0.4]
+      stress_range: [0.8, 1.0]
+    Neutral:
+      emotion_range: [0.4, 0.6]
+      stress_range: [0.3, 0.6]
+
+clinical_rules:
+  # PHQ-9 / GAD-7 based thresholds
+  phq9_thresholds:
+    minimal: 0
+    mild: 5
+    moderate: 10
+    moderately_severe: 15
+    severe: 20
+  
+  gad7_thresholds:
+    minimal: 0
+    mild: 5
+    moderate: 10
+    severe: 15
+  
+  # Risk level scoring
+  risk_levels:
+    low: [0, 8]           # Low risk score
+    moderate: [8, 15]     # Moderate risk
+    high: [15, 22]        # High risk
+    crisis: [22, 30]      # Crisis state
+  
+  # Crisis trigger rules
+  crisis_triggers:
+    - name: "sustained_high_stress"
+      description: "Stress > 0.85 for 3+ consecutive days"
+      condition:
+        stress_threshold: 0.85
+        duration_days: 3
+    
+    - name: "stress_and_low_emotion"
+      description: "High stress + very low emotion value"
+      condition:
+        stress_threshold: 0.7
+        emotion_threshold: 0.2
+        duration_days: 2
+    
+    - name: "rapid_mood_decline"
+      description: "Emotion value drops > 0.5 in 2 days"
+      condition:
+        emotion_drop: 0.5
+        duration_days: 2
+    
+    - name: "persistent_anxiety"
+      description: "Anxious state predicted 4+ consecutive days"
+      condition:
+        emotion: "Anxious"
+        duration_days: 4
+        confidence_threshold: 0.6
+
+validation:
+  # Input validation constraints
+  input_shape:
+    batch_size: null      # Variable, but typically 1
+    lookback_days: 14
+    num_features: 4
+  
+  feature_ranges:
+    emotion_value: [0.0, 1.0]
+    stress_value: [0.0, 1.0]
+    hour_of_day: [0.0, 1.0]
+    day_of_week: [0.0, 1.0]
+  
+  # Error messages
+  error_messages:
+    invalid_shape: "Input tensor shape {actual} doesn't match expected {expected}"
+    invalid_feature_range: "Feature {feature} value {value} out of range {range}"
+    missing_data: "Insufficient data: need {required} samples, got {actual}"

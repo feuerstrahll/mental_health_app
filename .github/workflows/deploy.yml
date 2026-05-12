@@ -1,0 +1,107 @@
+name: Deploy Backend to Yandex VM
+
+on:
+  push:
+    branches:
+      - main
+      - production
+    paths:
+      - 'backend/**'
+      - 'bge_service/**'
+      - 'infra/**'
+      - '.github/workflows/deploy.yml'
+  workflow_dispatch:  # Allow manual trigger
+
+jobs:
+  test-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      
+      - name: Install dependencies
+        run: |
+          cd backend
+          pip install -e .[dev]
+      
+      - name: Run tests
+        run: |
+          cd backend
+          pytest app/tests -v --tb=short -ra
+        continue-on-error: false
+      
+      - name: Install Yandex CLI
+        run: |
+          curl https://storage.yandexcloud.net/yandexcloud-yc/install.sh | bash -s -- -a
+          export PATH=$PATH:$HOME/yandex-cloud/bin
+      
+      - name: Configure SSH
+        env:
+          SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          KNOWN_HOSTS: ${{ secrets.DEPLOY_HOST }}
+        run: |
+          mkdir -p ~/.ssh
+          echo "$SSH_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -p ${{ secrets.DEPLOY_PORT }} ${{ secrets.DEPLOY_HOST }} >> ~/.ssh/known_hosts 2>/dev/null || true
+      
+      - name: Deploy to Yandex VM
+        env:
+          BACKEND_HOST: ${{ secrets.DEPLOY_HOST }}
+          BACKEND_SSH_USER: ${{ secrets.DEPLOY_USER }}
+          BACKEND_SSH_PORT: ${{ secrets.DEPLOY_PORT }}
+          YC_REGISTRY_ID: ${{ secrets.YC_REGISTRY_ID }}
+          YC_IAM_TOKEN: ${{ secrets.YC_IAM_TOKEN }}
+          SSH_KEY_PATH: ~/.ssh/deploy_key
+          LOCAL_BACKEND_ENV_FILE: ${{ github.workspace }}/infra/env/backend.env.prod
+          LOCAL_QWEN_ENV_FILE: ${{ github.workspace }}/infra/env/qwen.env.prod
+        run: |
+          export PATH=$PATH:$HOME/yandex-cloud/bin
+          
+          # Verify env files exist
+          [ -f "$LOCAL_BACKEND_ENV_FILE" ] || (echo "❌ backend.env.prod not found" && exit 1)
+          [ -f "$LOCAL_QWEN_ENV_FILE" ] || (echo "❌ qwen.env.prod not found" && exit 1)
+          
+          echo "✓ Environment files found"
+          echo "✓ Deploying to $BACKEND_HOST..."
+          
+          bash infra/deploy/yandex/deploy.sh
+      
+      - name: Health check
+        env:
+          HEALTH_URL: "http://${{ secrets.DEPLOY_HOST }}:8000/api/v1/health"
+        run: |
+          echo "Waiting for service startup..."
+          sleep 10
+          
+          for i in {1..10}; do
+            if curl -f "$HEALTH_URL" 2>/dev/null; then
+              echo "✓ Service healthy"
+              exit 0
+            fi
+            echo "Attempt $i/10..."
+            sleep 3
+          done
+          
+          echo "❌ Health check failed"
+          exit 1
+      
+      - name: Notify success
+        if: success()
+        run: |
+          echo "✓ Deployment successful!"
+          echo "Backend: http://${{ secrets.DEPLOY_HOST }}:8000"
+          echo "Docs: http://${{ secrets.DEPLOY_HOST }}:8000/docs"
+      
+      - name: Notify failure
+        if: failure()
+        run: |
+          echo "❌ Deployment failed. Check logs above."
+          echo "SSH to VM: ssh ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}"
+          echo "View logs: docker logs mental-health-backend"
+          exit 1

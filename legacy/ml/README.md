@@ -1,40 +1,7 @@
-# ML Model Training
+﻿# Legacy ML Archive
 
-## Обучение модели
+This directory contains archived, non-runtime ML artifacts from earlier experiments.
 
-```bash
-pip install -r requirements.txt
-python train_model.py
-```
+These files are kept for historical reference and should not be treated as active MVP architecture.
 
-## Копирование модели в проект
-
-```bash
-mkdir -p ../assets/models
-cp ../assets/models/mood_predictor.tflite ../assets/models/
-```
-
-## Архитектура модели
-
-- **Вход:** `[7, 4]` - 7 дней × 4 признака
-  - Эмоция (encoded: 0-1)
-  - Уровень стресса (normalized: 0-1)
-  - Час дня (normalized: 0-1)
-  - День недели (normalized: 0-1)
-
-- **Выход:** `[5]` - вероятности 5 эмоций
-  - Радость
-  - Грусть
-  - Тревога
-  - Спокойствие
-  - Стресс
-
-- **Размер:** ~50-100 KB
-
-## Персонализация
-
-Модель обучается на синтетических данных и может быть дообучена на реальных данных пользователей через:
-1. Экспорт данных через `MoodProvider.exportDataForML()`
-2. Дообучение модели офлайн
-3. Обновление `.tflite` файла в приложении
-
+Active decision pipeline lives in `backend/app/services/orchestration/decision_pipeline.py` and related backend services.

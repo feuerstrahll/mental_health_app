@@ -1,0 +1,54 @@
+﻿version: "3.9"
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    env_file:
+      - ./env/postgres.env.example
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  backend:
+    build:
+      context: ..
+      dockerfile: infra/docker/backend.Dockerfile
+    env_file:
+      - ./env/backend.env.example
+      - ./env/qwen.env.example
+    depends_on:
+      - postgres
+      - qwen
+      - bge-gateway
+    ports:
+      - "8000:8000"
+
+  bge-gateway:
+    build:
+      context: ../bge_service
+    expose:
+      - "8001"
+
+  qwen:
+    build:
+      context: ../FreeQwenApi
+    environment:
+      NODE_ENV: production
+      PORT: 3264
+      HOST: 0.0.0.0
+      SKIP_ACCOUNT_MENU: "true"
+    ports:
+      - "127.0.0.1:3264:3264"
+
+  nginx:
+    build:
+      context: ..
+      dockerfile: infra/docker/nginx.Dockerfile
+    depends_on:
+      - backend
+    ports:
+      - "8080:80"
+
+volumes:
+  postgres_data:

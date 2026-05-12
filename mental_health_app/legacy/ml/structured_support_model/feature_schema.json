@@ -1,0 +1,2120 @@
+{
+  "schema_version": "1.0.0",
+  "task": "structured_support_baseline",
+  "output_targets": {
+    "support_need_score": "float_0_1",
+    "support_profile": [
+      "stable_pattern",
+      "elevated_stress_pattern",
+      "depleted_pattern",
+      "unstable_pattern"
+    ]
+  },
+  "features": [
+    {
+      "name": "stress_mean_3d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "stress_std_3d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "stress_min_3d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "stress_max_3d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "stress_trend_3d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "stress_availability_3d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "energy_mean_3d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "energy_std_3d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "energy_min_3d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "energy_max_3d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "energy_trend_3d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "energy_availability_3d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "sleep_mean_3d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "sleep_std_3d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "sleep_min_3d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "sleep_max_3d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "sleep_trend_3d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "sleep_availability_3d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "sleep_regularity_mean_3d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "sleep_regularity_std_3d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "sleep_regularity_min_3d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "sleep_regularity_max_3d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "sleep_regularity_trend_3d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "sleep_regularity_availability_3d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "sleep_quality_mean_3d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "sleep_quality_std_3d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "sleep_quality_min_3d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "sleep_quality_max_3d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "sleep_quality_trend_3d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "sleep_quality_availability_3d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "activity_minutes_mean_3d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "activity_minutes_std_3d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "activity_minutes_min_3d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "activity_minutes_max_3d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "activity_minutes_trend_3d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "activity_minutes_availability_3d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "sedentary_minutes_mean_3d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "sedentary_minutes_std_3d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "sedentary_minutes_min_3d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "sedentary_minutes_max_3d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "sedentary_minutes_trend_3d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "sedentary_minutes_availability_3d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "outdoor_minutes_mean_3d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "outdoor_minutes_std_3d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "outdoor_minutes_min_3d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "outdoor_minutes_max_3d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "outdoor_minutes_trend_3d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "outdoor_minutes_availability_3d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "social_connectedness_mean_3d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "social_connectedness_std_3d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "social_connectedness_min_3d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "social_connectedness_max_3d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "social_connectedness_trend_3d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "social_connectedness_availability_3d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "routine_regularity_mean_3d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "routine_regularity_std_3d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "routine_regularity_min_3d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "routine_regularity_max_3d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "routine_regularity_trend_3d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "routine_regularity_availability_3d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "emotion_valence_mean_3d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "emotion_valence_std_3d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "emotion_valence_min_3d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "emotion_valence_max_3d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "emotion_valence_trend_3d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "emotion_valence_availability_3d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "note_present_mean_3d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "note_present_std_3d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "note_present_min_3d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "note_present_max_3d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "note_present_trend_3d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "note_present_availability_3d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "note_length_mean_3d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "note_length_std_3d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "note_length_min_3d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "note_length_max_3d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "note_length_trend_3d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "note_length_availability_3d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "note_negative_score_mean_3d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "note_negative_score_std_3d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "note_negative_score_min_3d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "note_negative_score_max_3d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "note_negative_score_trend_3d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "note_negative_score_availability_3d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "inactivity_streak_days_mean_3d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "inactivity_streak_days_std_3d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "inactivity_streak_days_min_3d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "inactivity_streak_days_max_3d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "inactivity_streak_days_trend_3d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "inactivity_streak_days_availability_3d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "checkins_count_3d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "stress_mean_7d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "stress_std_7d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "stress_min_7d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "stress_max_7d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "stress_trend_7d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "stress_availability_7d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "energy_mean_7d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "energy_std_7d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "energy_min_7d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "energy_max_7d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "energy_trend_7d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "energy_availability_7d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "sleep_mean_7d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "sleep_std_7d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "sleep_min_7d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "sleep_max_7d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "sleep_trend_7d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "sleep_availability_7d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "sleep_regularity_mean_7d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "sleep_regularity_std_7d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "sleep_regularity_min_7d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "sleep_regularity_max_7d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "sleep_regularity_trend_7d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "sleep_regularity_availability_7d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "sleep_quality_mean_7d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "sleep_quality_std_7d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "sleep_quality_min_7d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "sleep_quality_max_7d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "sleep_quality_trend_7d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "sleep_quality_availability_7d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "activity_minutes_mean_7d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "activity_minutes_std_7d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "activity_minutes_min_7d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "activity_minutes_max_7d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "activity_minutes_trend_7d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "activity_minutes_availability_7d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "sedentary_minutes_mean_7d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "sedentary_minutes_std_7d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "sedentary_minutes_min_7d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "sedentary_minutes_max_7d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "sedentary_minutes_trend_7d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "sedentary_minutes_availability_7d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "outdoor_minutes_mean_7d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "outdoor_minutes_std_7d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "outdoor_minutes_min_7d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "outdoor_minutes_max_7d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "outdoor_minutes_trend_7d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "outdoor_minutes_availability_7d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "social_connectedness_mean_7d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "social_connectedness_std_7d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "social_connectedness_min_7d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "social_connectedness_max_7d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "social_connectedness_trend_7d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "social_connectedness_availability_7d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "routine_regularity_mean_7d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "routine_regularity_std_7d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "routine_regularity_min_7d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "routine_regularity_max_7d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "routine_regularity_trend_7d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "routine_regularity_availability_7d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "emotion_valence_mean_7d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "emotion_valence_std_7d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "emotion_valence_min_7d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "emotion_valence_max_7d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "emotion_valence_trend_7d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "emotion_valence_availability_7d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "note_present_mean_7d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "note_present_std_7d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "note_present_min_7d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "note_present_max_7d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "note_present_trend_7d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "note_present_availability_7d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "note_length_mean_7d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "note_length_std_7d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "note_length_min_7d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "note_length_max_7d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "note_length_trend_7d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "note_length_availability_7d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "note_negative_score_mean_7d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "note_negative_score_std_7d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "note_negative_score_min_7d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "note_negative_score_max_7d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "note_negative_score_trend_7d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "note_negative_score_availability_7d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "inactivity_streak_days_mean_7d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "inactivity_streak_days_std_7d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "inactivity_streak_days_min_7d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "inactivity_streak_days_max_7d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "inactivity_streak_days_trend_7d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "inactivity_streak_days_availability_7d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "checkins_count_7d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "stress_mean_14d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "stress_std_14d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "stress_min_14d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "stress_max_14d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "stress_trend_14d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "stress_availability_14d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "energy_mean_14d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "energy_std_14d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "energy_min_14d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "energy_max_14d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "energy_trend_14d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "energy_availability_14d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "sleep_mean_14d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "sleep_std_14d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "sleep_min_14d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "sleep_max_14d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "sleep_trend_14d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "sleep_availability_14d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "sleep_regularity_mean_14d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "sleep_regularity_std_14d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "sleep_regularity_min_14d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "sleep_regularity_max_14d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "sleep_regularity_trend_14d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "sleep_regularity_availability_14d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "sleep_quality_mean_14d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "sleep_quality_std_14d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "sleep_quality_min_14d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "sleep_quality_max_14d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "sleep_quality_trend_14d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "sleep_quality_availability_14d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "activity_minutes_mean_14d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "activity_minutes_std_14d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "activity_minutes_min_14d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "activity_minutes_max_14d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "activity_minutes_trend_14d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "activity_minutes_availability_14d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "sedentary_minutes_mean_14d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "sedentary_minutes_std_14d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "sedentary_minutes_min_14d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "sedentary_minutes_max_14d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "sedentary_minutes_trend_14d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "sedentary_minutes_availability_14d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "outdoor_minutes_mean_14d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "outdoor_minutes_std_14d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "outdoor_minutes_min_14d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "outdoor_minutes_max_14d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "outdoor_minutes_trend_14d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "outdoor_minutes_availability_14d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "social_connectedness_mean_14d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "social_connectedness_std_14d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "social_connectedness_min_14d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "social_connectedness_max_14d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "social_connectedness_trend_14d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "social_connectedness_availability_14d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "routine_regularity_mean_14d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "routine_regularity_std_14d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "routine_regularity_min_14d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "routine_regularity_max_14d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "routine_regularity_trend_14d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "routine_regularity_availability_14d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "emotion_valence_mean_14d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "emotion_valence_std_14d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "emotion_valence_min_14d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "emotion_valence_max_14d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "emotion_valence_trend_14d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "emotion_valence_availability_14d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "note_present_mean_14d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "note_present_std_14d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "note_present_min_14d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "note_present_max_14d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "note_present_trend_14d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "note_present_availability_14d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "note_length_mean_14d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "note_length_std_14d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "note_length_min_14d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "note_length_max_14d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "note_length_trend_14d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "note_length_availability_14d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "note_negative_score_mean_14d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "note_negative_score_std_14d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "note_negative_score_min_14d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "note_negative_score_max_14d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "note_negative_score_trend_14d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "note_negative_score_availability_14d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "inactivity_streak_days_mean_14d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "inactivity_streak_days_std_14d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "inactivity_streak_days_min_14d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "inactivity_streak_days_max_14d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "inactivity_streak_days_trend_14d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "inactivity_streak_days_availability_14d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "checkins_count_14d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "stress_mean_delta_3d_14d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "energy_mean_delta_3d_14d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "sleep_mean_delta_3d_14d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "sleep_quality_mean_delta_3d_14d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "activity_minutes_mean_delta_3d_14d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "sedentary_minutes_mean_delta_3d_14d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "outdoor_minutes_mean_delta_3d_14d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "social_connectedness_mean_delta_3d_14d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "routine_regularity_mean_delta_3d_14d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "emotion_valence_mean_delta_3d_14d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "note_negative_score_mean_delta_3d_14d",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Rolling aggregate over recent history window"
+    },
+    {
+      "name": "history_events",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "User history depth at decision time"
+    },
+    {
+      "name": "history_days",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "User history depth at decision time"
+    },
+    {
+      "name": "personal_baseline_reliability",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Deviation from user-specific baseline with reliability weighting"
+    },
+    {
+      "name": "stress_vs_personal_baseline",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Deviation from user-specific baseline with reliability weighting"
+    },
+    {
+      "name": "energy_vs_personal_baseline",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Deviation from user-specific baseline with reliability weighting"
+    },
+    {
+      "name": "sleep_vs_personal_baseline",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Deviation from user-specific baseline with reliability weighting"
+    },
+    {
+      "name": "sleep_quality_vs_personal_baseline",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Deviation from user-specific baseline with reliability weighting"
+    },
+    {
+      "name": "sleep_regularity_vs_personal_baseline",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Deviation from user-specific baseline with reliability weighting"
+    },
+    {
+      "name": "activity_minutes_vs_personal_baseline",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Deviation from user-specific baseline with reliability weighting"
+    },
+    {
+      "name": "sedentary_minutes_vs_personal_baseline",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Deviation from user-specific baseline with reliability weighting"
+    },
+    {
+      "name": "outdoor_minutes_vs_personal_baseline",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Deviation from user-specific baseline with reliability weighting"
+    },
+    {
+      "name": "social_connectedness_vs_personal_baseline",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Deviation from user-specific baseline with reliability weighting"
+    },
+    {
+      "name": "routine_regularity_vs_personal_baseline",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Deviation from user-specific baseline with reliability weighting"
+    },
+    {
+      "name": "emotion_valence_vs_personal_baseline",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Deviation from user-specific baseline with reliability weighting"
+    },
+    {
+      "name": "note_negative_score_vs_personal_baseline",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "Deviation from user-specific baseline with reliability weighting"
+    },
+    {
+      "name": "is_cold_start",
+      "dtype": "float",
+      "required": true,
+      "nullable": false,
+      "description": "1 if user history is below safe threshold"
+    }
+  ],
+  "notes": [
+    "Baseline uses product signals and lightweight note-derived indicators (no PII).",
+    "Windows are limited to 3/7/14 days for production availability.",
+    "Cold-start handling is explicit via is_cold_start and reliability features."
+  ]
+}
