@@ -1,167 +1,136 @@
 # Mental Health Companion 💜
 
-Пилотное приложение-спутник (трекер ментального состояния, дневник, советы и практики) для поддержки психоэмоционального состояния.
+A pilot companion app (mood tracker, diary, tips, and practices) that supports psycho-emotional well-being.
 
-## 🏗️ Структура проекта
+## 🏗️ Project Structure
+
 
 ```
 lib/
-├── main.dart                      # ✅ Точка входа с провайдерами
+├── main.dart                      # Entry point with providers
 ├── core/
-│   ├── constants/app_constants.dart   # ✅ Константы и роуты
-│   ├── routing/app_router.dart        # ✅ Навигация (GoRouter)
-│   └── services/                      # Бизнес-логика и ML
-│       ├── database_service.dart      # ✅ Шифрованная SQLite
-│       ├── analytics_service.dart     # ✅ Аналитика и советы
-│       ├── chatbot_service.dart       # ✅ Логика чат-бота
-│       ├── ml_service.dart            # ✅ TFLite inference
-│       ├── mood_repository.dart       # ✅ Репозиторий дневника
-│       ├── storage_service.dart       # ✅ Локальное хранение
-│       ├── chat_repository.dart       # ✅ Репозиторий чата
-│       ├── feedback_service.dart      # ✅ Сервис обратной связи
-│       └── recommendation_service.dart # ✅ Сервис рекомендаций
+│   ├── constants/app_constants.dart   # Constants and routes
+│   ├── routing/app_router.dart        # Navigation (GoRouter)
+│   └── services/                      # Business logic and ML
+│       ├── database_service.dart      # Encrypted SQLite
+│       ├── analytics_service.dart     # Analytics and tips
+│       ├── chatbot_service.dart       # Chatbot logic
+│       ├── ml_service.dart            # TFLite inference
+│       ├── mood_repository.dart       # Diary repository
+│       ├── storage_service.dart       # Local storage
+│       ├── chat_repository.dart       # Chat repository
+│       ├── feedback_service.dart      # Feedback service
+│       └── recommendation_service.dart # Recommendation service
 ├── features/
 │   ├── chat/
-│   │   ├── models/chat_message.dart   # ✅ Модель сообщения
-│   │   └── screens/chat_screen.dart   # ✅ Экран чата
-│   ├── home/screens/home_screen.dart  # ✅ Главная панель
+│   │   ├── models/chat_message.dart   # Message model
+│   │   └── screens/chat_screen.dart   # Chat screen
+│   ├── home/screens/home_screen.dart  # Main dashboard
 │   ├── mood/screens/
-│   │   ├── diary_screen.dart          # ✅ Дневник настроения
-│   │   └── statistics_screen.dart     # ✅ Статистика
-│   ├── tips/screens/tips_screen.dart  # ✅ Советы и практики
-│   ├── help/screens/help_screen.dart  # ✅ Поддержка и контакты
-│   └── settings/screens/settings_screen.dart # ✅ Настройки
+│   │   ├── diary_screen.dart          # Mood diary
+│   │   └── statistics_screen.dart     # Statistics
+│   ├── tips/screens/tips_screen.dart  # Tips and practices
+│   ├── help/screens/help_screen.dart  # Support and contacts
+│   └── settings/screens/settings_screen.dart # Settings
 ├── providers/
-│   ├── chat_provider.dart            # ✅ Провайдер чата
-│   ├── mood_provider.dart            # ✅ Провайдер дневника и ML
-│   └── recommendation_provider.dart   # ✅ Провайдер рекомендаций
-├── widgets/                           # Переиспользуемые компоненты
-│   ├── message_bubble.dart          # ✅ Виджет сообщения чата
-│   ├── mood_selector.dart           # ✅ Селектор эмоций
-│   ├── feature_card.dart             # ✅ Карточка функции
-│   ├── mood_chart.dart               # ✅ Графики настроения
+│   ├── chat_provider.dart            # Chat provider
+│   ├── mood_provider.dart            # Diary and ML provider
+│   └── recommendation_provider.dart   # Recommendation provider
+├── widgets/                           # Reusable components
+│   ├── message_bubble.dart          # Chat message widget
+│   ├── mood_selector.dart           # Emotion selector
+│   ├── feature_card.dart             # Feature card
+│   ├── mood_chart.dart               # Mood charts
 │   └── README.md
-└── features/README.md               # Документация по модулям
+└── features/README.md               # Module documentation
 ```
 
-## 👥 Распределение задач
 
-### Алена — UI & Widgets
-**Директории:** `lib/features/*/screens`, `lib/widgets/`
+## 🚀 Quick Start
 
-**Задачи:**
-- [x] `home/screens/home_screen.dart` — главный экран ✅
-- [x] `chat/screens/chat_screen.dart` — интерфейс чата ✅
-- [x] `mood/screens/diary_screen.dart` — дневник настроения ✅
-- [x] `mood/screens/statistics_screen.dart` — статистика и графики ✅
-- [x] Общие виджеты: `message_bubble`, `mood_selector`, `feature_card`, `mood_chart` ✅
-
-### Вера — Данные и сервисы
-**Директории:** `lib/core/services/`, `lib/features/chat/models/`
-
-**Задачи:**
-- [x] `chat/models/chat_message.dart` — модель сообщения ✅
-- [x] `core/services/storage_service.dart` — локальное хранение ✅
-- [x] `core/services/mood_repository.dart` — репозиторий дневника ✅
-- [x] `core/services/analytics_service.dart` — аналитика ✅
-- [ ] Улучшения ML/Analytics по данным пользователей
-
-### Настя — Архитектура, провайдеры, ML
-**Директории:** `lib/providers/`, `lib/core/constants/`, `lib/core/routing/`, `lib/core/services/ml_service.dart`
-
-**Задачи:**
-- [x] `core/constants/app_constants.dart` — константы и роуты ✅
-- [x] `core/routing/app_router.dart` — навигация ✅
-- [x] `providers/chat_provider.dart` — состояние чата ✅
-- [x] `core/services/chatbot_service.dart` — логика чат-бота ✅
-- [x] `providers/mood_provider.dart` — состояние дневника + ML ✅
-- [x] `core/services/ml_service.dart` — интеграция TensorFlow Lite ✅
-
-## 🚀 Быстрый старт
-
-### 1. Установка зависимостей
+### 1. Install dependencies
 
 ```bash
 cd mental_health_app
 flutter pub get
 ```
 
-### 2. Запуск приложения
+### 2. Run the app
 
-**На Android (рекомендуется):**
+**On Android (recommended):**
 ```bash
 flutter run
-# или указать конкретное устройство
+# or specify a particular device
 flutter run -d <device-id>
 ```
 
-**Проверка доступных устройств:**
+**Check available devices:**
 ```bash
 flutter devices
 ```
 
 ### 3. Hot Reload
 
-После внесения изменений:
-- Нажмите `r` в терминале для hot reload
-- Нажмите `R` для полного перезапуска
+After making changes:
+- Press `r` in the terminal for hot reload
+- Press `R` for a full restart
 
-### 4. Использование Providers
+### 4. Using Providers
 
-Все провайдеры уже интегрированы в `main.dart` и готовы к использованию:
+All providers are already integrated into `main.dart` and ready to use:
 
 ```dart
-// Пример использования ChatProvider
+// Example of using ChatProvider
 final chatProvider = context.read<ChatProvider>();
-chatProvider.sendMessage('Привет!');
+chatProvider.sendMessage('Hello!');
 
-// Пример использования MoodProvider
+// Example of using MoodProvider
 final moodProvider = context.read<MoodProvider>();
 await moodProvider.addEntry(
-  emotion: 'Радость',
+  emotion: 'Joy',
   stressLevel: 5,
 );
 ```
 
-📖 **Полное руководство:** см. `PROVIDERS_GUIDE.md`
+📖 **Full guide:** see `PROVIDERS_GUIDE.md`
 
-## 📦 Зависимости
+## 📦 Dependencies
 
-Установленные зависимости:
-- ✅ `flutter` - SDK
-- ✅ `provider: ^6.1.1` - State management
-- ✅ `path_provider: ^2.1.4` - Доступ к файловой системе
-- ✅ `go_router: ^13.0.0` - Навигация
-- ✅ `intl: ^0.18.1` - Форматирование дат
-- ✅ `hive: ^2.2.3` - Локальное хранилище (для будущего использования)
-- ✅ `hive_flutter: ^1.1.0`
+Installed dependencies:
+-  `flutter` - SDK
+-  `provider: ^6.1.1` - State management
+-  `path_provider: ^2.1.4` - File system access
+-  `go_router: ^13.0.0` - Navigation
+-  `intl: ^0.18.1` - Date formatting
+-  `hive: ^2.2.3` - Local storage (for future use)
+-  `hive_flutter: ^1.1.0`
 
-**Дополнительные зависимости:**
-- ✅ `fl_chart: ^0.66.0` - Графики для статистики (используется в mood_chart.dart)
-- ✅ `sqflite_sqlcipher: ^2.3.0` - Шифрованная SQLite база данных
+**Additional dependencies:**
+-  `fl_chart: ^0.66.0` - Charts for statistics (used in mood_chart.dart)
+-  `sqflite_sqlcipher: ^2.3.0` - Encrypted SQLite database
 
 ## 🔄 Git Workflow
 
-### Создание веток
+### Creating branches
 
-**Алена:**
+**Alena:**
 ```bash
 git checkout -b feature/screens
 git checkout -b feature/widgets
 ```
 
-**Вера:**
+**Vera:**
 ```bash
 git checkout -b feature/models
 git checkout -b feature/services
 ```
 
-**Настя**
+**Nastya:**
 ```bash
 git checkout -b feature/providers
 ```
 
-### Коммиты
+### Commits
 
 ```bash
 git add .
@@ -169,102 +138,92 @@ git commit -m "feat: add chat screen"
 git push origin feature/screens
 ```
 
-### Merge
+### Merging
 
-Создайте Pull Request и запросите ревью у команды перед слиянием.
+Create a Pull Request and request a review from the team before merging.
 
 ## 📝 Code Style
 
-- Используйте `const` для неизменяемых виджетов
-- Называйте файлы в snake_case: `chat_screen.dart`
-- Называйте классы в PascalCase: `ChatScreen`
-- Добавляйте комментарии к публичным методам
-- Следуйте рекомендациям `flutter_lints`
+- Use `const` for immutable widgets
+- Name files in snake_case: `chat_screen.dart`
+- Name classes in PascalCase: `ChatScreen`
+- Add comments to public methods
+- Follow the `flutter_lints` recommendations
 
-## 🧪 Тестирование
+## 🧪 Testing
 
 ```bash
-# Запуск тестов
+# Run tests
 flutter test
 
-# Анализ кода
+# Analyze code
 flutter analyze
 ```
 
-## 📱 Платформы
+## 📱 Platforms
 
-- ✅ Android - основная платформа (требует Android SDK)
-- ⚠️ iOS, Windows, Linux, Web - удалены для упрощения разработки
+- ✅ Android - main platform (requires the Android SDK)
+- ⚠️ iOS, Windows, Linux, Web - removed to simplify development
 
-## 🆘 Помощь
+## 🆘 Help
 
-**Проблемы с запуском?**
+**Trouble running the app?**
 ```bash
 flutter doctor -v
 ```
 
-**Очистка кэша:**
+**Clear the cache:**
 ```bash
 flutter clean
 flutter pub get
 ```
 
-**Конфликты зависимостей:**
+**Dependency conflicts:**
 ```bash
 flutter pub upgrade
 ```
 
-## ✨ Реализованные функции
+## ✨ Implemented Features
 
-### 🤖 Чат-бот помощник
-- ✅ Интеллектуальные ответы на основе ключевых слов
-- ✅ Поддержка тем: стресс, эмоции, сон, отношения
-- ✅ Сохранение истории чата
-- ✅ Экспорт истории в файл
-- ✅ Поиск по сообщениям
+### 🤖 Chatbot Assistant
+-  Smart keyword-based responses
+-  Supported topics: stress, emotions, sleep, relationships
+-  Chat history saving
+-  Export of history to a file
+-  Message search
 
-### 📔 Дневник настроения
-- ✅ Добавление/редактирование/удаление записей
-- ✅ Отслеживание эмоций и уровня стресса (1-10)
-- ✅ Статистика и аналитика с графиками
-- ✅ Фильтрация по дате, эмоциям, стрессу
-- ✅ Экспорт данных для ML
-- ✅ Визуализация данных (линейные графики, круговые диаграммы)
+### 📔 Mood Diary
+-  Add, edit, and delete entries
+-  Tracking of emotions and stress level (1-10)
+-  Statistics and analytics with charts
+-  Filtering by date, emotion, and stress
+-  Data export for ML
+-  Data visualization (line charts, pie charts)
 
-### 🎯 Система рекомендаций
-- ✅ Персонализированные рекомендации на основе настроения
-- ✅ Обратная связь о вмешательствах
-- ✅ Адаптация рекомендаций на основе эффективности
+### 🎯 Recommendation System
+-  Personalized recommendations based on mood
+-  Feedback on interventions
+-  Recommendations adapted to their effectiveness
 
 ### 🎨 UI/UX
-- ✅ Material Design 3
-- ✅ Удобная навигация
-- ✅ Адаптивный дизайн
-- ✅ Современный интерфейс
+-  Material Design 3
+-  Convenient navigation
+-  Responsive design
+-  Modern interface
 
-## 📚 Документация
+## 📚 Documentation
 
-- **PROVIDERS_GUIDE.md** - Полное руководство по использованию провайдеров
-- **lib/models/README.md** - Описание моделей данных
-- **lib/core/services/README.md** - Описание сервисов
-- **lib/features/README.md** - Описание экранов по модулям
+- **PROVIDERS_GUIDE.md** - Full guide to using providers
+- **lib/models/README.md** - Description of data models
+- **lib/core/services/README.md** - Description of services
+- **lib/features/README.md** - Description of screens by module
 
-## 📚 Полезные ссылки
+## 🔗 Useful Links
 
 - [Flutter Documentation](https://docs.flutter.dev/)
 - [Provider Package](https://pub.dev/packages/provider)
 - [Go Router](https://pub.dev/packages/go_router)
 - [Material Design](https://m3.material.io/)
 
-## 💡 Советы для разработчиков
 
-1. **Читайте PROVIDERS_GUIDE.md** перед работой с state management
-2. **Используйте Hot Reload** для быстрой разработки
-3. **Коммитьте часто** с понятными сообщениями
-4. **Тестируйте на реальном устройстве** для лучшего опыта
-5. **Запрашивайте ревью** перед слиянием кода
-6. **Используйте `context.read()` для действий**, `context.watch()` для чтения данных
 
----
-
-Made with ❤️ for mental health support
